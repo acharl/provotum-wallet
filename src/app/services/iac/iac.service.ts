@@ -9,17 +9,17 @@ import {
   RelayMessage,
   UiEventElementsService
 } from '@airgap/angular-core'
-import { BeaconMessageType, SigningType, SignPayloadResponseInput } from '@airgap/beacon-sdk'
+// import { BeaconMessageType, SigningType, SignPayloadResponseInput } from '@airgap/beacon-sdk'
 import { Inject, Injectable } from '@angular/core'
 import {
   AccountShareResponse,
   AirGapMarketWallet,
   AirGapWalletStatus,
   IACMessageDefinitionObject,
-  IACMessageType,
-  MainProtocolSymbols,
-  MessageSignResponse,
-  ProtocolSymbols
+  IACMessageType
+  // MainProtocolSymbols,
+  // MessageSignResponse,
+  // ProtocolSymbols
 } from '@airgap/coinlib-core'
 import { Router } from '@angular/router'
 
@@ -137,21 +137,9 @@ export class IACService extends BaseIACService {
   }
 
   private async handleMessageSignResponse(deserializedMessages: IACMessageDefinitionObject[]): Promise<boolean> {
-    const cachedRequest = await this.beaconService.getVaultRequest()
+    const keygen = (deserializedMessages[0].payload as any).message
+    console.log(JSON.parse(keygen))
 
-    const messageSignResponse = deserializedMessages[0].payload as MessageSignResponse
-    const protocol: ProtocolSymbols = deserializedMessages[0].protocol
-    const response: SignPayloadResponseInput = {
-      type: BeaconMessageType.SignPayloadResponse,
-      id: cachedRequest[0]?.id,
-      signature: messageSignResponse.signature,
-      signingType: SigningType.RAW
-    }
-    if (protocol === MainProtocolSymbols.XTZ) {
-      await this.beaconService.respond(response, cachedRequest[0])
-    } else if (protocol === MainProtocolSymbols.ETH) {
-      await this.walletConnectService.approveRequest(response.id, response.signature)
-    }
-    return false
+    return true
   }
 }
