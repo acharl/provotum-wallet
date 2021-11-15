@@ -47,7 +47,9 @@ export class KeyShareService {
       this.storageProvider.get(WalletStorageKey.KEYSHARE)
     ])
 
-    console.log(rawGroups) // TODO JGD
+    console.log('loadKeySyncsFromStorage rawGroups', rawGroups) // TODO JGD
+    const groups = rawGroups || []
+
     let keyShares = rawKeyShares || []
 
     // migrating double-serialization
@@ -59,7 +61,23 @@ export class KeyShareService {
       }
     }
 
-    // "keyShares" can be undefined here
+    // read groups
+    await Promise.all(
+      groups.map(async (group: SerializedPublicKeyShareGroup) => {
+        const keyShares: PublicKeyShare[] = (
+          await Promise.all(
+            group.keyShares.map((keyShare) => {
+              return keyShare
+            })
+          )
+        ).filter((keyShare: PublicKeyShare | undefined) => keyShare !== undefined)
+
+        const walletGroup: PublicKeyShareGroup = new PublicKeyShareGroup(group.id, group.label, group.interactionSetting, keyShares)
+
+        this.keyShareGroups.set(walletGroup.id, walletGroup)
+      })
+    )
+
     if (!keyShares) {
       keyShares = []
     }
@@ -164,7 +182,6 @@ export class KeyShareService {
   }
 
   public setActiveGroup(groupToSet: PublicKeyShareGroup | ImplicitWalletGroup | undefined): void {
-    console.log('setActiveGroup allKeyShares', this.allKeyShares)
     if (groupToSet === 'all') {
       this.activeGroup$.next(groupToSet)
       this.keyShares$.next(this.allKeyShares)

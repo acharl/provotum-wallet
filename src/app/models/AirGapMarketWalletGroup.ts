@@ -14,7 +14,7 @@ export interface SerializedPublicKeyShareGroup {
   id: string
   label: string
   interactionSetting: InteractionSetting
-  keyShares: [string][]
+  keyShares: PublicKeyShare[]
 }
 
 export enum InteractionSetting {
@@ -156,7 +156,7 @@ export class PublicKeyShareGroup {
       id: this.id,
       label: this.label,
       interactionSetting: this.interactionSetting,
-      keyShares: this.keyShares.map((keyShare: PublicKeyShare) => [keyShare.pk.toString()])
+      keyShares: this.keyShares.map((keyShare: PublicKeyShare) => keyShare)
     }
   }
 
