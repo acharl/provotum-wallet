@@ -1,11 +1,11 @@
 import { flattened } from '@airgap/angular-core'
 import { Component } from '@angular/core'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { LoadingController, NavController, Platform } from '@ionic/angular'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
-// import { AccountProvider } from 'src/app/services/account/account.provider'
 import { DataService } from 'src/app/services/data/data.service'
+import { KeyShareService } from 'src/app/services/key-share/key-share.service'
 import { ErrorCategory, handleErrorSentry } from 'src/app/services/sentry-error-handler/sentry-error-handler'
 import { KeyShareSync } from 'src/app/types/KeyShareSync'
 
@@ -33,8 +33,8 @@ export class KeyShareImportPage {
     private readonly loadingCtrl: LoadingController,
     private readonly navController: NavController,
     private readonly route: ActivatedRoute,
-    // private readonly router: Router,
-    // private readonly accountProvider: AccountProvider,
+    private readonly router: Router,
+    private readonly keyShareService: KeyShareService,
     private readonly dataService: DataService // private readonly ngZone: NgZone
   ) {}
 
@@ -94,12 +94,11 @@ export class KeyShareImportPage {
       }
     })
 
-    console.log('addKeyShareInfos', addKeyShareInfos)
-    // await this.accountProvider.addWallets(addWalletInfos)
-    // addWalletInfos.forEach((addWalletInfo) => {
-    //   this.accountProvider.setInteractionSettingForWalletGroupByWallet(addWalletInfo.walletToAdd, addWalletInfo.interactionSetting)
+    await this.keyShareService.addKeyShares(addKeyShareInfos)
+    // addKeyShareInfos.forEach((addKeyShareInfo) => {
+    //   this.keyShareService.setInteractionSettingForWalletGroupByWallet(addKeyShareInfo.keyShare, addKeyShareInfo.interactionSetting)
     // })
 
-    // await this.router.navigateByUrl('/tabs/portfolio')
+    await this.router.navigateByUrl('/tabs/portfolio')
   }
 }

@@ -1,22 +1,15 @@
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
-import { AirGapMarketWallet, ICoinSubProtocol } from '@airgap/coinlib-core'
-import { forkJoin, from, Observable, ReplaySubject, Subscription } from 'rxjs'
+import { Observable, ReplaySubject, Subscription } from 'rxjs'
 import { Platform } from '@ionic/angular'
 
-import { CryptoToFiatPipe } from '../../pipes/crypto-to-fiat/crypto-to-fiat.pipe'
-import { AccountProvider } from '../../services/account/account.provider'
-import { DataServiceKey } from '../../services/data/data.service'
-import { OperationsProvider } from '../../services/operations/operations'
 import { ErrorCategory, handleErrorSentry } from '../../services/sentry-error-handler/sentry-error-handler'
-import { ProtocolService } from '@airgap/angular-core'
-import BigNumber from 'bignumber.js'
-import { AirGapWallet, AirGapWalletStatus } from '@airgap/coinlib-core/wallet/AirGapWallet'
-import { map, take } from 'rxjs/operators'
+
+import { PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { KeyShareService } from 'src/app/services/key-share/key-share.service'
 
 interface WalletGroup {
-  mainWallet: AirGapMarketWallet
-  subWallets: AirGapMarketWallet[]
+  keyShare: PublicKeyShare
 }
 
 @Component({
@@ -32,75 +25,53 @@ export class PortfolioPage {
   public total: number = 0
   public changePercentage: number = 0
 
-  public wallets: Observable<AirGapMarketWallet[]>
-  public activeWallets: Observable<AirGapMarketWallet[]>
+  public keyShares: Observable<PublicKeyShare[]>
+  public keyShareGroups: ReplaySubject<PublicKeyShare[]> = new ReplaySubject(1)
+
   public walletGroups: ReplaySubject<WalletGroup[]> = new ReplaySubject(1)
   public isDesktop: boolean = false
 
-  public readonly AirGapWalletStatus: typeof AirGapWalletStatus = AirGapWalletStatus
-
-  constructor(
-    private readonly router: Router,
-    private readonly walletsProvider: AccountProvider,
-    private readonly operationsProvider: OperationsProvider,
-    private readonly protocolService: ProtocolService,
-    public platform: Platform
-  ) {
+  constructor(private readonly router: Router, private readonly keyShareService: KeyShareService, public platform: Platform) {
     this.isDesktop = !this.platform.is('hybrid')
 
-    this.wallets = this.walletsProvider.wallets$.asObservable()
-    this.activeWallets = this.wallets.pipe(map((wallets) => wallets.filter((wallet) => wallet.status === AirGapWalletStatus.ACTIVE) ?? []))
+    this.keyShares = this.keyShareService.keyShares$.asObservable()
 
-    // If a wallet gets added or removed, recalculate all values
-    this.wallets.subscribe((wallets: AirGapMarketWallet[]) => {
-      this.calculateTotal(wallets)
-
-      this.refreshWalletGroups(wallets)
+    this.walletGroups.subscribe((groups) => {
+      console.log('HARIBOL', groups)
     })
-    this.walletsProvider.walletChangedObservable.subscribe(() => {
-      this.calculateTotal(this.walletsProvider.getWalletList())
+    // If a keyShare gets added or removed, recalculate all values
+    this.keyShares.subscribe((keyShares: PublicKeyShare[]) => {
+      console.log('KEY SHARES', keyShares)
+      this.refreshWalletGroups(keyShares)
     })
   }
 
-  private refreshWalletGroups(wallets: AirGapMarketWallet[]) {
+  private refreshWalletGroups(keyShares: PublicKeyShare[]) {
     const groups: WalletGroup[] = []
 
     const walletMap: Map<string, WalletGroup> = new Map()
 
-    wallets
-      .filter((wallet: AirGapWallet) => wallet.status === AirGapWalletStatus.ACTIVE)
-      .forEach((wallet: AirGapMarketWallet) => {
-        const isSubProtocol: boolean = ((wallet.protocol as any) as ICoinSubProtocol).isSubProtocol
-        const identifier: string = isSubProtocol ? wallet.protocol.identifier.split('-')[0] : wallet.protocol.identifier
+    keyShares.forEach((keyShare: PublicKeyShare) => {
+      const walletKey: string = `${keyShare.pk.toString()}`
 
-        const walletKey: string = `${wallet.publicKey}_${identifier}`
-
-        if (walletMap.has(walletKey)) {
-          const group: WalletGroup = walletMap.get(walletKey)
-          if (isSubProtocol) {
-            group.subWallets.push(wallet)
-          } else {
-            group.mainWallet = wallet
-          }
-        } else {
-          if (isSubProtocol) {
-            walletMap.set(walletKey, { mainWallet: undefined, subWallets: [wallet] })
-          } else {
-            walletMap.set(walletKey, { mainWallet: wallet, subWallets: [] })
-          }
-        }
-      })
+      if (walletMap.has(walletKey)) {
+        const group: WalletGroup = walletMap.get(walletKey)
+        group.keyShare = keyShare
+      } else {
+        walletMap.set(walletKey, { keyShare })
+      }
+    })
 
     walletMap.forEach((value: WalletGroup) => {
       groups.push(value)
     })
 
     groups.sort((group1: WalletGroup, group2: WalletGroup) => {
-      if (group1.mainWallet && group2.mainWallet) {
-        return group1.mainWallet.protocol.symbol.localeCompare(group2.mainWallet.protocol.symbol)
-      } else if (group1.mainWallet) {
+      if (group1.keyShare && group2.keyShare) {
+        return group1.keyShare.pk.toString().localeCompare(group2.keyShare.pk.toString())
+      } else if (group1.keyShare) {
         return -1
-      } else if (group2.mainWallet) {
+      } else if (group2.keyShare) {
         return 1
       } else {
         return 0
@@ -109,10 +80,10 @@ export class PortfolioPage {
 
     // TODO: Find a solution to this
     /*
-    It seems like this is an Ionic / Angular bug. If a wallet is deleted on a sub-page
+    It seems like this is an Ionic / Angular bug. If a keyShare is deleted on a sub-page
     (which is how it is done currently), then the UI end up in a weird state. There is no
-    crash, but some wallets are not shown and empty cards are being displayed. To resolve this,
-    the app has to be restarted or another wallet has to be added. When investigating,
+    crash, but some keyShares are not shown and empty cards are being displayed. To resolve this,
+    the app has to be restarted or another keyShare has to be added. When investigating,
     we saw that it is related to the transition phase. If the observable emits at the same time
     as the transition is happening, then this weird state occurs. If we simply wait, everything
     works as intended. 
@@ -122,73 +93,13 @@ export class PortfolioPage {
     }, 500)
   }
 
-  public ionViewDidEnter() {
-    this.doRefresh().catch(handleErrorSentry())
-  }
-
-  public openDetail(mainWallet: AirGapMarketWallet, subWallet?: AirGapMarketWallet) {
-    const info = subWallet
-      ? {
-          mainWallet,
-          wallet: subWallet
-        }
-      : {
-          wallet: mainWallet
-        }
-    this.router
-      .navigateByUrl(
-        `/account-transaction-list/${DataServiceKey.ACCOUNTS}/${info.wallet.publicKey}/${info.wallet.protocol.identifier}/${info.wallet.addressIndex}`
-      )
-      .catch(console.error)
-  }
+  public openDetail(_mainWallet: PublicKeyShare, _subWallet?: PublicKeyShare) {}
 
   public openAccountAddPage() {
     this.router.navigateByUrl('/account-add').catch(handleErrorSentry(ErrorCategory.NAVIGATION))
   }
-  public async doRefresh(event: any = null) {
-    // XTZ: Refresh delegation status
-    this.operationsProvider.refreshAllDelegationStatuses(this.walletsProvider.getWalletList())
 
-    const observables = [
-      this.walletsProvider.getWalletList().map((wallet) => {
-        return from(wallet.synchronize())
-      })
-    ]
-    /**
-     * if we use await Promise.all() instead, then each wallet
-     * is synchronized asynchronously, leading to blocking behaviour.
-     * Instead we want to synchronize all wallets simultaneously
-     */
-    const allWalletsSynced = forkJoin([observables])
-
-    this.subscription = allWalletsSynced.subscribe(() => {
-      this.calculateTotal(this.walletsProvider.getWalletList(), event ? event.target : null)
-      this.wallets.pipe(take(1)).subscribe(wallets => this.refreshWalletGroups(wallets))
-    })
-  }
-
-  public async calculateTotal(wallets: AirGapMarketWallet[], refresher: any = null): Promise<void> {
-    const cryptoToFiatPipe = new CryptoToFiatPipe(this.protocolService)
-    wallets = wallets.filter((wallet) => wallet.status === AirGapWalletStatus.ACTIVE)
-    this.total = (
-      await Promise.all(
-        wallets.map((wallet) =>
-          cryptoToFiatPipe.transform(wallet.currentBalance, {
-            protocolIdentifier: wallet.protocol.identifier,
-            currentMarketPrice: wallet.currentMarketPrice
-          })
-        )
-      )
-    )
-      .reduce((sum: BigNumber, next: string) => sum.plus(next), new BigNumber(0))
-      .toNumber()
-
-    if (refresher) {
-      refresher.complete()
-    }
-
-    this.isVisible = 'visible'
-  }
+  doRefresh(_event: any) {}
 
   public ngOnDestroy(): void {
     this.subscription.unsubscribe()

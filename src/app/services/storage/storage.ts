@@ -4,8 +4,9 @@ import { ICoinProtocol, SerializedAirGapWallet } from '@airgap/coinlib-core'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { Injectable } from '@angular/core'
 import { Storage } from '@ionic/storage'
+import { PublicKeyShare } from 'src/app/types/KeyShareSync'
 
-import { SerializedAirGapMarketWalletGroup } from '../../models/AirGapMarketWalletGroup'
+import { SerializedAirGapMarketWalletGroup, SerializedPublicKeyShareGroup } from '../../models/AirGapMarketWalletGroup'
 import { ExchangeTransactionDetails } from '../exchange/exchange'
 
 export type BeaconRequest = [string, any, ICoinProtocol]
@@ -25,6 +26,8 @@ export enum WalletStorageKey {
   EXCHANGE_INTEGRATION = 'exchangeIntroduction',
   WALLET = 'wallets',
   WALLET_GROUPS = 'walletGroups',
+  KEYSHARE = 'keyShares',
+  KEYSHARE_GROUPS = 'keyShareGroups',
   LAST_TX_BROADCAST = 'lastTxBroadcast',
   USER_ID = 'user_id',
   PENDING_EXCHANGE_TRANSACTIONS = 'PENDING_EXCHANGE_TRANSACTIONS',
@@ -48,6 +51,8 @@ interface WalletStorageKeyReturnType {
   [WalletStorageKey.EXCHANGE_INTEGRATION]: boolean
   [WalletStorageKey.WALLET]: SerializedAirGapWallet[] | undefined
   [WalletStorageKey.WALLET_GROUPS]: SerializedAirGapMarketWalletGroup[] | undefined
+  [WalletStorageKey.KEYSHARE]: PublicKeyShare[] | undefined
+  [WalletStorageKey.KEYSHARE_GROUPS]: SerializedPublicKeyShareGroup[] | undefined
   [WalletStorageKey.LAST_TX_BROADCAST]: IBroadcastTransaction | undefined
   [WalletStorageKey.USER_ID]: string | undefined
   [WalletStorageKey.PENDING_EXCHANGE_TRANSACTIONS]: ExchangeTransactionDetails[]
@@ -67,6 +72,8 @@ const defaultValues: WalletStorageKeyReturnDefaults = {
   [WalletStorageKey.EXCHANGE_INTEGRATION]: false,
   [WalletStorageKey.WALLET]: undefined,
   [WalletStorageKey.WALLET_GROUPS]: undefined,
+  [WalletStorageKey.KEYSHARE]: undefined,
+  [WalletStorageKey.KEYSHARE_GROUPS]: undefined,
   [WalletStorageKey.LAST_TX_BROADCAST]: undefined,
   [WalletStorageKey.USER_ID]: undefined,
   [WalletStorageKey.PENDING_EXCHANGE_TRANSACTIONS]: [],

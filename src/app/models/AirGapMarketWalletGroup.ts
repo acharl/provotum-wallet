@@ -1,13 +1,20 @@
 import { IACMessageTransport } from '@airgap/angular-core'
 import { AirGapMarketWallet } from '@airgap/coinlib-core'
 import { AirGapWalletStatus } from '@airgap/coinlib-core/wallet/AirGapWallet'
-
+import { PublicKeyShare } from '../types/KeyShareSync'
 export interface SerializedAirGapMarketWalletGroup {
   id: string
   label: string
   status: AirGapWalletStatus
   interactionSetting: InteractionSetting
   wallets: [string, string][]
+}
+
+export interface SerializedPublicKeyShareGroup {
+  id: string
+  label: string
+  interactionSetting: InteractionSetting
+  keyShares: [string][]
 }
 
 export enum InteractionSetting {
@@ -106,5 +113,54 @@ export class AirGapMarketWalletGroup {
 
   public includesWallet(wallet: AirGapMarketWallet) {
     return this.wallets.includes(wallet)
+  }
+}
+
+export class PublicKeyShareGroup {
+  private _label: string | null
+  public get label(): string {
+    return this._label
+  }
+
+  private _interactionSetting: InteractionSetting
+
+  public get interactionSetting(): InteractionSetting {
+    return this._interactionSetting
+  }
+
+  public set interactionSetting(setting: InteractionSetting) {
+    this._interactionSetting = setting
+  }
+
+  constructor(
+    public readonly id: string | undefined,
+    label: string | undefined,
+    interactionSetting: InteractionSetting | undefined,
+    public readonly keyShares: PublicKeyShare[],
+    public readonly transient: boolean = false
+  ) {
+    this.updateLabel(label)
+    this.updateInteractionSetting(interactionSetting)
+  }
+
+  public updateLabel(label: string): void {
+    this._label = label
+  }
+
+  public updateInteractionSetting(interactionSetting: InteractionSetting): void {
+    this._interactionSetting = interactionSetting ? interactionSetting : InteractionSetting.UNDETERMINED
+  }
+
+  public toJSON(): SerializedPublicKeyShareGroup {
+    return {
+      id: this.id,
+      label: this.label,
+      interactionSetting: this.interactionSetting,
+      keyShares: this.keyShares.map((keyShare: PublicKeyShare) => [keyShare.pk.toString()])
+    }
+  }
+
+  public includesKeyShare(keyShare: PublicKeyShare) {
+    return this.keyShares.includes(keyShare)
   }
 }
