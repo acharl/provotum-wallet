@@ -36,6 +36,7 @@ import { AddressHandler } from './custom-handlers/address-handler'
 import { BeaconHandler } from './custom-handlers/beacon-handler'
 import { WalletConnectHandler } from './custom-handlers/walletconnect-handler'
 import { transportToInteractionSetting } from 'src/app/models/AirGapMarketWalletGroup'
+import { KeyShareSync, PublicKeyShare } from 'src/app/types/KeyShareSync'
 
 @Injectable({
   providedIn: 'root'
@@ -136,10 +137,26 @@ export class IACService extends BaseIACService {
     return false
   }
 
-  private async handleMessageSignResponse(deserializedMessages: IACMessageDefinitionObject[]): Promise<boolean> {
-    const keygen = (deserializedMessages[0].payload as any).message
-    console.log(JSON.parse(keygen))
+  private async handleMessageSignResponse(
+    deserializedMessages: IACMessageDefinitionObject[],
+    transport: IACMessageTransport
+  ): Promise<boolean> {
+    const keyShare: PublicKeyShare = JSON.parse((deserializedMessages[0].payload as any).message)
 
-    return true
+    this.storageSerivce.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
+
+    const keyShareSync: KeyShareSync = {
+      keyShare,
+      interactionSetting: transportToInteractionSetting(transport)
+    }
+
+    if (this.router) {
+      this.dataService.setData(DataServiceKey.SYNC_KEYSHARE, [keyShareSync])
+      this.router.navigateByUrl(`/keyshare-import/${DataServiceKey.SYNC_KEYSHARE}`).catch(handleErrorSentry(ErrorCategory.NAVIGATION))
+
+      return true
+    }
+
+    return false
   }
 }

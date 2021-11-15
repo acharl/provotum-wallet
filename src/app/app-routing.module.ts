@@ -55,6 +55,15 @@ const routes: Routes = [
     canActivate: [ServiceKeyGuard],
     loadChildren: () => import('./pages/account-import/account-import.module').then((m) => m.AccountImportPageModule)
   },
+
+  {
+    path: 'keyshare-import/:id',
+    resolve: {
+      special: DataResolverService
+    },
+    canActivate: [ServiceKeyGuard],
+    loadChildren: () => import('./pages/key-share-import/key-share-import.module').then((m) => m.KeyShareImportPageModule)
+  },
   {
     path: 'account-transaction-list/:id/:publicKey/:protocolID/:addressIndex',
     canActivate: [ProtocolGuard, ServiceKeyGuard],
@@ -85,7 +94,8 @@ const routes: Routes = [
       special: DataResolverService
     },
     canActivate: [ProtocolGuard, ServiceKeyGuard],
-    loadChildren: () => import('./pages/sub-account-add-generic/sub-account-add-generic.module').then((m) => m.SubAccountAddGenericPageModule)
+    loadChildren: () =>
+      import('./pages/sub-account-add-generic/sub-account-add-generic.module').then((m) => m.SubAccountAddGenericPageModule)
   },
   {
     path: 'sub-account-select/:id',
@@ -222,6 +232,10 @@ const routes: Routes = [
       import('./pages/interaction-selection-settings/interaction-selection-settings.module').then(
         (m) => m.InteractionSelectionSettingsPageModule
       )
+  },
+  {
+    path: 'key-share-import',
+    loadChildren: () => import('./pages/key-share-import/key-share-import.module').then((m) => m.KeyShareImportPageModule)
   }
 ]
 @NgModule({

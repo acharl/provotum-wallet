@@ -7,9 +7,6 @@
 </ion-header>
 <ion-content fullscreen="true">
   <ion-grid fixed="true" class="ion-no-padding">
-    <ng-container *ngIf="activeWallets | async as walletsArray">
-      <chart *ngIf="walletsArray.length > 0" [total]="total"></chart>
-    </ng-container>
     <ion-toolbar color="translucent">
       <current-wallet-group></current-wallet-group>
     </ion-toolbar>

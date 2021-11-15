@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core'
 import { WalletStorageService } from '../storage/storage'
 import { BehaviorSubject, Observable } from 'rxjs'
 import { AccountSync } from 'src/app/types/AccountSync'
+import { KeyShareSync } from 'src/app/types/KeyShareSync'
 
 export enum DataServiceKey {
   SYNC_ACCOUNTS = 'sync-accounts',
+  SYNC_KEYSHARE = 'sync-keyshare',
   ACCOUNTS = 'accounts',
   PROTOCOL = 'protocol',
   DETAIL = 'detail',
@@ -21,6 +23,7 @@ export enum DataServiceKey {
 export class DataService {
   private readonly data = []
   private accountSyncs$: BehaviorSubject<AccountSync[] | null> = new BehaviorSubject(null)
+  private keyShareSyncs$: BehaviorSubject<KeyShareSync[] | null> = new BehaviorSubject(null)
 
   constructor(private readonly storage: WalletStorageService) {}
 
@@ -28,9 +31,16 @@ export class DataService {
     return this.accountSyncs$.asObservable()
   }
 
+  public getKeyShareSyncs(): Observable<KeyShareSync[] | null> {
+    return this.keyShareSyncs$.asObservable()
+  }
+
   public setData(id, data) {
     if (id === DataServiceKey.SYNC_ACCOUNTS) {
       this.accountSyncs$.next(data)
+    }
+    if (id === DataServiceKey.SYNC_KEYSHARE) {
+      this.keyShareSyncs$.next(data)
     }
     this.data[id] = data
   }
