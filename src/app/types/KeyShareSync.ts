@@ -1,15 +1,24 @@
 import { InteractionSetting } from '../models/AirGapMarketWalletGroup'
 
 export interface KeyGenerationProof {
+  challenge: string
+  response: string
+}
+
+export interface PublicKeyShare {
+  pk: string
+  proof: KeyGenerationProof
+}
+export interface Uint8KeyGenerationProof {
   challenge: number[]
   response: number[]
 }
 
-export interface PublicKeyShare {
+export interface Uint8PublicKeyShare {
   pk: number[]
-  proof: KeyGenerationProof
+  proof: Uint8KeyGenerationProof
 }
 export interface KeyShareSync {
-  keyShare: PublicKeyShare
+  keyShare: Uint8PublicKeyShare
   interactionSetting?: InteractionSetting
 }

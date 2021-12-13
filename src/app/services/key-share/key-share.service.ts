@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core'
 import { ReplaySubject } from 'rxjs'
 import { PublicKeyShareGroup, SerializedPublicKeyShareGroup } from 'src/app/models/AirGapMarketWalletGroup'
-import { PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
 import { WalletStorageKey, WalletStorageService } from '../storage/storage'
 
 export interface PublicKeyShareAddInfo {
-  keyShare: PublicKeyShare
+  keyShare: Uint8PublicKeyShare
   groupId?: string
   groupLabel?: string
   options?: { override?: boolean; updateState?: boolean }
@@ -22,16 +22,19 @@ export class KeyShareService {
   private readonly keyShareGroups: Map<string | undefined, PublicKeyShareGroup> = new Map()
   public keySharesHaveLoaded: ReplaySubject<boolean> = new ReplaySubject(1)
 
-  public keyShares$: ReplaySubject<PublicKeyShare[]> = new ReplaySubject(1)
+  public keyShares$: ReplaySubject<Uint8PublicKeyShare[]> = new ReplaySubject(1)
   public keyShareGroups$: ReplaySubject<PublicKeyShareGroup[]> = new ReplaySubject(1)
-  public allKeyShares$: ReplaySubject<PublicKeyShare[]> = new ReplaySubject(1)
+  public allKeyShares$: ReplaySubject<Uint8PublicKeyShare[]> = new ReplaySubject(1)
 
   public get allKeyShareGroups(): PublicKeyShareGroup[] {
     return Array.from(this.keyShareGroups.values())
   }
 
-  private get allKeyShares(): PublicKeyShare[] {
-    return this.allKeyShareGroups.reduce((keyShares: PublicKeyShare[], group: PublicKeyShareGroup) => keyShares.concat(group.keyShares), [])
+  private get allKeyShares(): Uint8PublicKeyShare[] {
+    return this.allKeyShareGroups.reduce(
+      (keyShares: Uint8PublicKeyShare[], group: PublicKeyShareGroup) => keyShares.concat(group.keyShares),
+      []
+    )
   }
   constructor(private readonly storageProvider: WalletStorageService) {
     this.loadKeySyncsFromStorage()
@@ -42,7 +45,7 @@ export class KeyShareService {
   }
 
   private async loadKeySyncsFromStorage() {
-    const [rawGroups, rawKeyShares]: [SerializedPublicKeyShareGroup[] | undefined, PublicKeyShare[] | undefined] = await Promise.all([
+    const [rawGroups, rawKeyShares]: [SerializedPublicKeyShareGroup[] | undefined, Uint8PublicKeyShare[] | undefined] = await Promise.all([
       this.storageProvider.get(WalletStorageKey.KEYSHARE_GROUPS),
       this.storageProvider.get(WalletStorageKey.KEYSHARE)
     ])
@@ -64,13 +67,13 @@ export class KeyShareService {
     // read groups
     await Promise.all(
       groups.map(async (group: SerializedPublicKeyShareGroup) => {
-        const keyShares: PublicKeyShare[] = (
+        const keyShares: Uint8PublicKeyShare[] = (
           await Promise.all(
             group.keyShares.map((keyShare) => {
               return keyShare
             })
           )
-        ).filter((keyShare: PublicKeyShare | undefined) => keyShare !== undefined)
+        ).filter((keyShare: Uint8PublicKeyShare | undefined) => keyShare !== undefined)
 
         const walletGroup: PublicKeyShareGroup = new PublicKeyShareGroup(group.id, group.label, group.interactionSetting, keyShares)
 
@@ -110,9 +113,9 @@ export class KeyShareService {
     }
   }
 
-  public keyShareExists(testKeyShare: PublicKeyShare): boolean {
+  public keyShareExists(testKeyShare: Uint8PublicKeyShare): boolean {
     return this.allKeyShares.some(
-      (keyShare: PublicKeyShare) => this.isSameKeyShare(keyShare, testKeyShare) && keyShare.pk === testKeyShare.pk
+      (keyShare: Uint8PublicKeyShare) => this.isSameKeyShare(keyShare, testKeyShare) && keyShare.pk === testKeyShare.pk
     )
   }
 
@@ -136,7 +139,7 @@ export class KeyShareService {
     }
   }
 
-  public isSameKeyShare(keyShare1: PublicKeyShare, keyShare2: PublicKeyShare) {
+  public isSameKeyShare(keyShare1: Uint8PublicKeyShare, keyShare2: Uint8PublicKeyShare) {
     return (
       keyShare1.pk === keyShare2.pk &&
       keyShare1.proof.challenge === keyShare2.proof.challenge &&
@@ -157,7 +160,7 @@ export class KeyShareService {
     }
   }
 
-  private addToGroup(group: PublicKeyShareGroup, keyShare: PublicKeyShare): void {
+  private addToGroup(group: PublicKeyShareGroup, keyShare: Uint8PublicKeyShare): void {
     const [oldGroupId, oldIndex]: [string | undefined, number] = this.findWalletGroupIdAndIndex(keyShare)
     if (oldGroupId !== group.id && oldIndex > -1) {
       this.keyShareGroups.get(oldGroupId).keyShares.splice(oldIndex, 1)
@@ -170,9 +173,9 @@ export class KeyShareService {
     }
   }
 
-  public findWalletGroupIdAndIndex(testWallet: PublicKeyShare): [string | undefined, number] {
+  public findWalletGroupIdAndIndex(testWallet: Uint8PublicKeyShare): [string | undefined, number] {
     for (const group of this.keyShareGroups.values()) {
-      const index: number = group.keyShares.findIndex((keyShare: PublicKeyShare) => this.isSameKeyShare(keyShare, testWallet))
+      const index: number = group.keyShares.findIndex((keyShare: Uint8PublicKeyShare) => this.isSameKeyShare(keyShare, testWallet))
       if (index !== -1) {
         return [group.id, index]
       }
@@ -187,7 +190,7 @@ export class KeyShareService {
       this.keyShares$.next(this.allKeyShares)
     } else if (groupToSet !== undefined && this.keyShareGroups.has(groupToSet.id)) {
       const group: PublicKeyShareGroup = this.keyShareGroups.get(groupToSet.id)
-      const keyShares: PublicKeyShare[] = group.keyShares
+      const keyShares: Uint8PublicKeyShare[] = group.keyShares
 
       this.activeGroup$.next(group)
       this.keyShares$.next(keyShares)
@@ -205,7 +208,7 @@ export class KeyShareService {
       ),
       this.storageProvider.set(
         WalletStorageKey.KEYSHARE,
-        this.allKeyShares.map((keyShare: PublicKeyShare) => keyShare)
+        this.allKeyShares.map((keyShare: Uint8PublicKeyShare) => keyShare)
       )
     ])
   }

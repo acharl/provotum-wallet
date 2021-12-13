@@ -25,6 +25,8 @@ import { EmptyStateComponent } from './empty-state/empty-state'
 import { FeeComponent } from './fee/fee.component'
 import { FromToComponent } from './from-to/from-to.component'
 import { InteractionSelectionComponent } from './interaction-selection/interaction-selection.component'
+import { KeyShareComponent } from './key-share/key-share.component'
+import { LoadingItemComponent } from './loading-item/loading-item.component'
 import { PermissionRequestComponent } from './permission-request/permission-request.component'
 import { PortfolioItemComponent } from './portfolio-item/portfolio-item'
 import { SignedTransactionComponent } from './signed-transaction/signed-transaction'
@@ -74,7 +76,9 @@ import { WidgetSelector } from './widget-selector/widget-selector'
     WidgetIconText,
     WidgetInputText,
     WidgetRewardList,
-    WidgetOptionButtonGroup
+    WidgetOptionButtonGroup,
+    KeyShareComponent,
+    LoadingItemComponent
   ],
   imports: [
     IonicModule,
@@ -121,7 +125,9 @@ import { WidgetSelector } from './widget-selector/widget-selector'
     WidgetIconText,
     WidgetInputText,
     WidgetRewardList,
-    WidgetOptionButtonGroup
+    WidgetOptionButtonGroup,
+    KeyShareComponent,
+    LoadingItemComponent
   ],
   entryComponents: [AccountEditPopoverComponent, DelegateEditPopoverComponent, DappPeerComponent]
 })

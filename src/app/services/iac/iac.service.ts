@@ -36,7 +36,7 @@ import { AddressHandler } from './custom-handlers/address-handler'
 import { BeaconHandler } from './custom-handlers/beacon-handler'
 import { WalletConnectHandler } from './custom-handlers/walletconnect-handler'
 import { transportToInteractionSetting } from 'src/app/models/AirGapMarketWalletGroup'
-import { KeyShareSync, PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { KeyShareSync, Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
 
 @Injectable({
   providedIn: 'root'
@@ -141,7 +141,7 @@ export class IACService extends BaseIACService {
     deserializedMessages: IACMessageDefinitionObject[],
     transport: IACMessageTransport
   ): Promise<boolean> {
-    const keyShare: PublicKeyShare = JSON.parse((deserializedMessages[0].payload as any).message)
+    const keyShare: Uint8PublicKeyShare = JSON.parse((deserializedMessages[0].payload as any).message)
 
     this.storageSerivce.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
 

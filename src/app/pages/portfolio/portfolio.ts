@@ -5,11 +5,11 @@ import { Platform } from '@ionic/angular'
 
 import { ErrorCategory, handleErrorSentry } from '../../services/sentry-error-handler/sentry-error-handler'
 
-import { PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
 import { KeyShareService } from 'src/app/services/key-share/key-share.service'
 
 interface WalletGroup {
-  keyShare: PublicKeyShare
+  keyShare: Uint8PublicKeyShare
 }
 
 @Component({
@@ -25,8 +25,8 @@ export class PortfolioPage {
   public total: number = 0
   public changePercentage: number = 0
 
-  public keyShares: Observable<PublicKeyShare[]>
-  public keyShareGroups: ReplaySubject<PublicKeyShare[]> = new ReplaySubject(1)
+  public keyShares: Observable<Uint8PublicKeyShare[]>
+  public keyShareGroups: ReplaySubject<Uint8PublicKeyShare[]> = new ReplaySubject(1)
 
   public walletGroups: ReplaySubject<WalletGroup[]> = new ReplaySubject(1)
   public isDesktop: boolean = false
@@ -36,22 +36,18 @@ export class PortfolioPage {
 
     this.keyShares = this.keyShareService.keyShares$.asObservable()
 
-    this.walletGroups.subscribe((groups) => {
-      console.log('HARIBOL', groups)
-    })
     // If a keyShare gets added or removed, recalculate all values
-    this.keyShares.subscribe((keyShares: PublicKeyShare[]) => {
-      console.log('KEY SHARES', keyShares)
+    this.subscription = this.keyShares.subscribe((keyShares: Uint8PublicKeyShare[]) => {
       this.refreshWalletGroups(keyShares)
     })
   }
 
-  private refreshWalletGroups(keyShares: PublicKeyShare[]) {
+  private refreshWalletGroups(keyShares: Uint8PublicKeyShare[]) {
     const groups: WalletGroup[] = []
 
     const walletMap: Map<string, WalletGroup> = new Map()
 
-    keyShares.forEach((keyShare: PublicKeyShare) => {
+    keyShares.forEach((keyShare: Uint8PublicKeyShare) => {
       const walletKey: string = `${keyShare.pk.toString()}`
 
       if (walletMap.has(walletKey)) {
@@ -93,7 +89,9 @@ export class PortfolioPage {
     }, 500)
   }
 
-  public openDetail(_mainWallet: PublicKeyShare, _subWallet?: PublicKeyShare) {}
+  public openDetail(_mainWallet: Uint8PublicKeyShare, _subWallet?: Uint8PublicKeyShare) {
+    console.log(JSON.stringify(_mainWallet))
+  }
 
   public openAccountAddPage() {
     this.router.navigateByUrl('/account-add').catch(handleErrorSentry(ErrorCategory.NAVIGATION))

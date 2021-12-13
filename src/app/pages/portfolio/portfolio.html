@@ -15,9 +15,7 @@
     <ng-container *ngIf="walletGroups | async as walletGroupsArray; else loading">
       <ng-container *ngIf="walletGroupsArray.length; else noItems">
         <ion-list class="walletGroups ion-no-padding" lines="none" *ngFor="let walletGroup of walletGroupsArray">
-          <ion-card>
-            {{walletGroup | json}}
-          </ion-card>
+          <app-key-share [keyShare]="walletGroup.keyShare"></app-key-share>
         </ion-list>
       </ng-container>
       <ng-template #noItems>

@@ -4,7 +4,7 @@ import { ICoinProtocol, SerializedAirGapWallet } from '@airgap/coinlib-core'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { Injectable } from '@angular/core'
 import { Storage } from '@ionic/storage'
-import { PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
 
 import { SerializedAirGapMarketWalletGroup, SerializedPublicKeyShareGroup } from '../../models/AirGapMarketWalletGroup'
 import { ExchangeTransactionDetails } from '../exchange/exchange'
@@ -51,7 +51,7 @@ interface WalletStorageKeyReturnType {
   [WalletStorageKey.EXCHANGE_INTEGRATION]: boolean
   [WalletStorageKey.WALLET]: SerializedAirGapWallet[] | undefined
   [WalletStorageKey.WALLET_GROUPS]: SerializedAirGapMarketWalletGroup[] | undefined
-  [WalletStorageKey.KEYSHARE]: PublicKeyShare[] | undefined
+  [WalletStorageKey.KEYSHARE]: Uint8PublicKeyShare[] | undefined
   [WalletStorageKey.KEYSHARE_GROUPS]: SerializedPublicKeyShareGroup[] | undefined
   [WalletStorageKey.LAST_TX_BROADCAST]: IBroadcastTransaction | undefined
   [WalletStorageKey.USER_ID]: string | undefined
