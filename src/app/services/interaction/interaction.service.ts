@@ -16,7 +16,7 @@ export class InteractionService {
     private readonly deeplinkService: DeeplinkService,
     private readonly operationsProvider: OperationsProvider,
     private readonly router: Router
-  ) { }
+  ) {}
 
   public startInteraction(
     group: AirGapMarketWalletGroup,
@@ -40,7 +40,7 @@ export class InteractionService {
         this.sameDeviceSign(wallet, interactionData as IACMessageDefinitionObjectV3[], type, isRelay, generatedId)
         break
       case InteractionSetting.OFFLINE_DEVICE:
-        this.offlineDeviceSign(wallet, airGapTxs, interactionData as IACMessageDefinitionObjectV3[], type, isRelay, generatedId)
+        // this.offlineDeviceSign(wallet, airGapTxs, interactionData as IACMessageDefinitionObjectV3[], type, isRelay, generatedId)
         break
       case InteractionSetting.LEDGER:
         this.ledgerSign(wallet, airGapTxs, interactionData)
@@ -65,24 +65,15 @@ export class InteractionService {
       data: interactionData,
       type,
       isRelay,
-      generatedId,
+      generatedId
     }
     this.dataService.setData(DataServiceKey.INTERACTION, info)
     this.router.navigateByUrl('/interaction-selection/' + DataServiceKey.INTERACTION).catch(handleErrorSentry(ErrorCategory.NAVIGATION))
   }
 
-  public async offlineDeviceSign(
-    wallet: AirGapMarketWallet,
-    airGapTxs: IAirGapTransaction[],
-    interactionData: IACMessageDefinitionObjectV3[],
-    type: IACMessageType,
-    isRelay: boolean = false,
-    generatedId?: number
-  ) {
-    const dataQR = await this.prepareQRData(wallet, interactionData, type, isRelay, generatedId)
+  public async offlineDeviceSign(interactionData: IACMessageDefinitionObjectV3[]) {
+    const dataQR = interactionData //await this.prepareQRData(interactionData, type, isRelay, generatedId)
     const info = {
-      wallet,
-      airGapTxs,
       data: dataQR,
       interactionData
     }

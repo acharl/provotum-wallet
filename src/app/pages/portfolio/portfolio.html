@@ -18,6 +18,10 @@
           <app-key-share [keyShare]="walletGroup.keyShare"></app-key-share>
         </ion-list>
       </ng-container>
+
+      <ion-item>
+        <ion-button shape="round" size="small" color="primary" slot="end" (click)="fetchEncryptedCiphers()">FETCH CIPHERS</ion-button>
+      </ion-item>
       <ng-template #noItems>
         <empty-state
           *ngIf="isDesktop"

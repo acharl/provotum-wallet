@@ -7,6 +7,9 @@ import { ErrorCategory, handleErrorSentry } from '../../services/sentry-error-ha
 
 import { Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
 import { KeyShareService } from 'src/app/services/key-share/key-share.service'
+import { ApiService } from 'src/app/services/api/api.service'
+import { InteractionService } from 'src/app/services/interaction/interaction.service'
+import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, MessageSignRequest } from '@airgap/coinlib-core'
 
 interface WalletGroup {
   keyShare: Uint8PublicKeyShare
@@ -31,7 +34,13 @@ export class PortfolioPage {
   public walletGroups: ReplaySubject<WalletGroup[]> = new ReplaySubject(1)
   public isDesktop: boolean = false
 
-  constructor(private readonly router: Router, private readonly keyShareService: KeyShareService, public platform: Platform) {
+  constructor(
+    private readonly router: Router,
+    private readonly keyShareService: KeyShareService,
+    private readonly apiService: ApiService,
+    private readonly interactionService: InteractionService,
+    public platform: Platform
+  ) {
     this.isDesktop = !this.platform.is('hybrid')
 
     this.keyShares = this.keyShareService.keyShares$.asObservable()
@@ -40,6 +49,25 @@ export class PortfolioPage {
     this.subscription = this.keyShares.subscribe((keyShares: Uint8PublicKeyShare[]) => {
       this.refreshWalletGroups(keyShares)
     })
+  }
+
+  async fetchEncryptedCiphers() {
+    const encryptedCiphers = await this.apiService.getEncryptedCiphers()
+
+    const messageSignRequest: MessageSignRequest = {
+      message: JSON.stringify(encryptedCiphers),
+      publicKey: '',
+      callbackURL: ''
+    }
+
+    const signRequestObject: IACMessageDefinitionObjectV3 = {
+      id: 12345678,
+      type: IACMessageType.MessageSignRequest,
+      protocol: MainProtocolSymbols.ETH,
+      payload: messageSignRequest
+    }
+
+    this.interactionService.offlineDeviceSign([signRequestObject])
   }
 
   private refreshWalletGroups(keyShares: Uint8PublicKeyShare[]) {

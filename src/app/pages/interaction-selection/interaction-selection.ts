@@ -51,7 +51,7 @@ export class InteractionSelectionPage {
     if (this.group.interactionSetting === InteractionSetting.UNDETERMINED) {
       await this.select(InteractionSetting.OFFLINE_DEVICE)
     }
-    this.interactionService.offlineDeviceSign(this.wallet, this.airGapTxs, this.interactionData, this.type, this.isRelay, this.generatedId)
+    // this.interactionService.offlineDeviceSign(this.wallet, this.airGapTxs, this.interactionData, this.type, this.isRelay, this.generatedId)
   }
 
   public async sameDeviceSign() {
