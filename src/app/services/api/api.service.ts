@@ -21,7 +21,15 @@ export class ApiService {
     })
   }
 
-  async getEncryptedCiphers(_vote: string = 'Vote5', _question: string = 'Question1'): Promise<Cipher[]> {
+  async getEncryptedCiphers(vote: string, question: string): Promise<Cipher[]> {
+    console.log(`Vote ${vote}, Question ${question}`)
+    return this.mockResponse()
+    // return axios.get(`${this.baseURL}/keygen/${vote}/${question}`, {
+    //   headers: { 'Content-Type': 'application/json' }
+    // })
+  }
+
+  mockResponse() {
     return [
       {
         a: [
@@ -2614,8 +2622,5 @@ export class ApiService {
         ]
       }
     ]
-    // return axios.get(`${this.baseURL}/keygen/${vote}/${question}`, {
-    //   headers: { 'Content-Type': 'application/json' }
-    // })
   }
 }

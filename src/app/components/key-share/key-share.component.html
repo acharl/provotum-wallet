@@ -1,10 +1,17 @@
 <ion-card>
-  <ion-item>
-    <ion-card-title>Public Key Share</ion-card-title>
-  </ion-item>
+  <img src="assets/img/keygen_wallet.svg" />
+  <ion-card-header>
+    <ion-text color="primary">Public Key Share</ion-text>
+  </ion-card-header>
 
   <ion-card-content>
-    <ion-item>
+    <ion-text color="secondary">
+      <h2>
+        To participate in the distributed key generation, each sealer is required to upload the public key share including the key
+        generation proof to the Public Bulletin Board.
+      </h2>
+    </ion-text>
+    <!-- <ion-item>
       <ion-label>pk: {{ _keyShare.pk | shortenString }}</ion-label>
     </ion-item>
     <ion-item>
@@ -12,13 +19,13 @@
     </ion-item>
     <ion-item>
       <ion-label>response: {{ _keyShare.proof.response | shortenString }}</ion-label>
-    </ion-item>
+    </ion-item> -->
 
     <ion-item *ngIf="!(busy$ | async)">
-      <ion-button shape="round" size="small" color="primary" slot="end" (click)="sync()">SYNC</ion-button>
+      <ion-button shape="round" size="small" color="primary" slot="end" color="secondary" (click)="sync()">BROADCAST</ion-button>
     </ion-item>
     <ion-item *ngIf="busy$ | async; then loading">
-      <ion-button shape="round" size="small" color="primary" slot="end" (click)="sync()">SYNC</ion-button>
+      <ion-button shape="round" size="small" color="primary" slot="end" color="secondary" (click)="sync()">BROADCAST</ion-button>
     </ion-item>
   </ion-card-content>
 

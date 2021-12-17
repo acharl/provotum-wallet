@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
 import { Observable, ReplaySubject, Subscription } from 'rxjs'
-import { Platform } from '@ionic/angular'
+import { AlertController, Platform } from '@ionic/angular'
 
 import { ErrorCategory, handleErrorSentry } from '../../services/sentry-error-handler/sentry-error-handler'
 
@@ -10,6 +10,7 @@ import { KeyShareService } from 'src/app/services/key-share/key-share.service'
 import { ApiService } from 'src/app/services/api/api.service'
 import { InteractionService } from 'src/app/services/interaction/interaction.service'
 import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, MessageSignRequest } from '@airgap/coinlib-core'
+import Swal from 'sweetalert2'
 
 interface WalletGroup {
   keyShare: Uint8PublicKeyShare
@@ -39,6 +40,7 @@ export class PortfolioPage {
     private readonly keyShareService: KeyShareService,
     private readonly apiService: ApiService,
     private readonly interactionService: InteractionService,
+    private readonly alertController: AlertController,
     public platform: Platform
   ) {
     this.isDesktop = !this.platform.is('hybrid')
@@ -51,25 +53,68 @@ export class PortfolioPage {
     })
   }
 
-  async fetchEncryptedCiphers() {
-    const encryptedCiphers = await this.apiService.getEncryptedCiphers()
+  async fetchEncryptedCiphers() {}
 
-    const messageSignRequest: MessageSignRequest = {
-      message: JSON.stringify(encryptedCiphers),
-      publicKey: '',
-      callbackURL: ''
-    }
-
-    const signRequestObject: IACMessageDefinitionObjectV3 = {
-      id: 12345678,
-      type: IACMessageType.MessageSignRequest,
-      protocol: MainProtocolSymbols.ETH,
-      payload: messageSignRequest
-    }
-
-    this.interactionService.offlineDeviceSign([signRequestObject])
+  public sweetalert() {
+    console.log('sweetalert')
+    Swal.fire({
+      title: 'Success',
+      text: 'Sweetalert2 is working fine.',
+      icon: 'success'
+    })
   }
+  async createAlert() {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Prompt!',
+      message: 'Please enter the Vote ID as well as the Question for which you want to fetch the encrypted votes',
+      inputs: [
+        {
+          name: 'vote',
+          type: 'text',
+          placeholder: 'Vote ID'
+        },
+        {
+          name: 'question',
+          type: 'text',
+          placeholder: 'Question'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel')
+          }
+        },
+        {
+          text: 'Ok',
+          handler: async (data) => {
+            const encryptedCiphers = await this.apiService.getEncryptedCiphers(data.vote, data.question)
 
+            const messageSignRequest: MessageSignRequest = {
+              message: JSON.stringify(encryptedCiphers),
+              publicKey: '',
+              callbackURL: ''
+            }
+
+            const signRequestObject: IACMessageDefinitionObjectV3 = {
+              id: 12345678,
+              type: IACMessageType.MessageSignRequest,
+              protocol: MainProtocolSymbols.ETH,
+              payload: messageSignRequest
+            }
+
+            this.interactionService.offlineDeviceSign([signRequestObject])
+          }
+        }
+      ]
+    })
+
+    await alert.present()
+  }
   private refreshWalletGroups(keyShares: Uint8PublicKeyShare[]) {
     const groups: WalletGroup[] = []
 

@@ -1,9 +1,8 @@
 import { Component, Input } from '@angular/core'
-import { ToastController } from '@ionic/angular'
 import { BehaviorSubject } from 'rxjs'
 import { ApiService } from 'src/app/services/api/api.service'
-import { ErrorCategory, handleErrorSentry } from 'src/app/services/sentry-error-handler/sentry-error-handler'
 import { PublicKeyShare, Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
+import Swal from 'sweetalert2'
 
 @Component({
   selector: 'app-key-share',
@@ -14,7 +13,7 @@ export class KeyShareComponent {
   _keyShare: PublicKeyShare
   public busy$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
 
-  constructor(private readonly apiService: ApiService, private readonly toastController: ToastController) {}
+  constructor(private readonly apiService: ApiService) {}
   @Input()
   set keyShare(value: Uint8PublicKeyShare) {
     this._keyShare = value as any
@@ -34,17 +33,16 @@ export class KeyShareComponent {
       .postKeygen(keyShare)
       .then((result) => {
         this.busy$.next(false)
-        this.showToast(result.data)
+        this.showSweetAlert(result.data)
       })
       .catch(() => this.busy$.next(false))
   }
 
-  private async showToast(message: string): Promise<void> {
-    const toast: HTMLIonToastElement = await this.toastController.create({
-      message: message,
-      duration: 3000,
-      position: 'bottom'
+  private async showSweetAlert(message: string): Promise<void> {
+    Swal.fire({
+      title: 'Success',
+      text: `${message}`,
+      icon: 'success'
     })
-    toast.present().catch(handleErrorSentry(ErrorCategory.IONIC_TOAST))
   }
 }
