@@ -1,8 +1,13 @@
 <ion-tabs #tabs (ionTabsDidChange)="tabChange(tabs)">
   <ion-tab-bar slot="bottom" *ngIf="isMobile">
     <ion-tab-button tab="portfolio">
-      <ion-icon name="list-outline"></ion-icon>
+      <ion-icon name="key-outline"></ion-icon>
       <ion-label>{{ 'tabs.wallets' | translate }}</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="sync">
+      <ion-icon name="finger-print-outline"></ion-icon>
+      <ion-label>{{ 'tabs.sync' | translate }}</ion-label>
     </ion-tab-button>
 
     <ion-tab-button tab="scan">

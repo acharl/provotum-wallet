@@ -1,15 +1,12 @@
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
-import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs'
-import { AlertController, Platform } from '@ionic/angular'
+import { Observable, ReplaySubject, Subscription } from 'rxjs'
+import { Platform } from '@ionic/angular'
 
 import { ErrorCategory, handleErrorSentry } from '../../services/sentry-error-handler/sentry-error-handler'
 
 import { Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
 import { KeyShareService } from 'src/app/services/key-share/key-share.service'
-import { ApiService } from 'src/app/services/api/api.service'
-import { InteractionService } from 'src/app/services/interaction/interaction.service'
-import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, MessageSignRequest } from '@airgap/coinlib-core'
 
 interface WalletGroup {
   keyShare: Uint8PublicKeyShare
@@ -33,14 +30,11 @@ export class PortfolioPage {
 
   public walletGroups: ReplaySubject<WalletGroup[]> = new ReplaySubject(1)
   public isDesktop: boolean = false
-  public busy$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
 
   constructor(
     private readonly router: Router,
     private readonly keyShareService: KeyShareService,
-    private readonly apiService: ApiService,
-    private readonly interactionService: InteractionService,
-    private readonly alertController: AlertController,
+
     public platform: Platform
   ) {
     this.isDesktop = !this.platform.is('hybrid')
@@ -53,63 +47,6 @@ export class PortfolioPage {
     })
   }
 
-  async fetchEncryptedCiphers() {
-    const alert = await this.alertController.create({
-      cssClass: 'my-custom-class',
-      header: 'Prompt!',
-      message: 'Please enter the Vote ID as well as the Question for which you want to fetch the encrypted votes',
-      inputs: [
-        {
-          name: 'vote',
-          type: 'text',
-          placeholder: 'Vote ID'
-        },
-        {
-          name: 'question',
-          type: 'text',
-          placeholder: 'Question'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          cssClass: 'secondary',
-          handler: () => {
-            console.log('Confirm Cancel')
-          }
-        },
-        {
-          text: 'Ok',
-          handler: async (data) => {
-            this.busy$.next(true)
-
-            const encryptedCiphers = await this.apiService.getEncryptedCiphers(data.vote, data.question)
-
-            const messageSignRequest: MessageSignRequest = {
-              message: JSON.stringify(encryptedCiphers),
-              publicKey: '',
-              callbackURL: ''
-            }
-
-            const signRequestObject: IACMessageDefinitionObjectV3 = {
-              id: 12345678,
-              type: IACMessageType.MessageSignRequest,
-              protocol: MainProtocolSymbols.ETH,
-              payload: messageSignRequest
-            }
-
-            this.interactionService
-              .offlineDeviceSign([signRequestObject])
-              .then(() => this.busy$.next(false))
-              .catch(() => this.busy$.next(false))
-          }
-        }
-      ]
-    })
-
-    await alert.present()
-  }
   private refreshWalletGroups(keyShares: Uint8PublicKeyShare[]) {
     const groups: WalletGroup[] = []
 
@@ -168,7 +105,6 @@ export class PortfolioPage {
   doRefresh(_event: any) {}
 
   public ngOnDestroy(): void {
-    this.busy$.next(false)
     this.subscription.unsubscribe()
   }
 }

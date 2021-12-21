@@ -27,11 +27,11 @@ const routes: Routes = [
         ]
       },
       {
-        path: 'exchange',
+        path: 'sync',
         children: [
           {
             path: '',
-            loadChildren: () => import('../exchange/exchange.module').then((m) => m.ExchangePageModule)
+            loadChildren: () => import('../sync/sync.module').then((m) => m.SyncPageModule)
           }
         ]
       },

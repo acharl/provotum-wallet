@@ -97,8 +97,8 @@
     "go_label": "Let's Go"
   },
   "portfolio": {
-    "empty-state_text": "Start by adding coins to AirGap Wallet, you will also need the <span class=\"style__strong color__primary\">AirGap Vault</span> application where your secret is securely stored.",
-    "empty-state_desktop_text": "Start by adding coins to AirGap Wallet, you can either do this with the <span class=\"style__strong color__primary\">AirGap Vault</span> application or for selected coins with a <span class=\"style__strong color__primary\">Ledger hardware wallet.</span>",
+    "empty-state_text": "Start by generating a  <span class=\"style__strong\">Public Key Share</span> using <span class=\"style__strong color__primary\">AirGap Vault</span>.",
+    "empty-state_desktop_text": "Start by generating a  <span class=\"style__strong\">Public Key Share</span> using <span class=\"style__strong color__primary\">AirGap Vault</span>.",
     "add-coins_label": "Add Coins"
   },
   "account-add": {
@@ -330,8 +330,9 @@
     "cancel": "Cancel"
   },
   "tabs": {
-    "wallets": "Accounts",
+    "wallets": "Key Shares",
     "scan": "Scan QRs",
+    "sync": "Decrypt",
     "ledger_import": "Ledger Import",
     "settings": "Settings",
     "exchange": "Exchange"

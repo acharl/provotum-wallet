@@ -244,6 +244,10 @@ const routes: Routes = [
   {
     path: 'key-share-import',
     loadChildren: () => import('./pages/key-share-import/key-share-import.module').then((m) => m.KeyShareImportPageModule)
+  },
+  {
+    path: 'sync',
+    loadChildren: () => import('./pages/sync/sync.module').then((m) => m.SyncPageModule)
   }
 ]
 @NgModule({
