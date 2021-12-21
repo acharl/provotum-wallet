@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { Cipher } from 'src/app/types/Cipher'
-import { DecryptionPostBody } from 'src/app/types/DecryptionPostBody'
-import { Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { SealerDecryptionPostBody } from 'src/app/types/DecryptionPostBody'
+import { Uint8PublicKeyShareSync } from 'src/app/types/KeyShareSync'
 import axios from '../../../../node_modules/axios'
 
 @Injectable({
@@ -12,12 +12,12 @@ export class ApiService {
 
   constructor() {}
 
-  async postKeygen(keyShare: Uint8PublicKeyShare, vote: string, sealer: string) {
+  async postKeygen(keyShare: Uint8PublicKeyShareSync, vote: string) {
     const body = JSON.stringify({
       pk: keyShare.pk,
       proof: keyShare.proof
     })
-    return axios.post(`${this.baseURL}/keygen/${vote}/${sealer}`, body, {
+    return axios.post(`${this.baseURL}/keygen/${vote}/${keyShare.sealer}`, body, {
       headers: { 'Content-Type': 'application/json' }
     })
   }
@@ -27,14 +27,16 @@ export class ApiService {
     const { data } = await axios.get(`${this.baseURL}/decrypt/${vote}/${question}`, {
       headers: { 'Content-Type': 'application/json' }
     })
-    console.log('HARIBOL', data)
     return data
   }
 
-  async postDecryptionResult(decryption: DecryptionPostBody, vote: string, question: string, sealer: string): Promise<Cipher[]> {
-    const body = JSON.stringify(decryption)
-
-    return axios.post(`${this.baseURL}/decrypt/${vote}/${question}/${sealer}`, body, {
+  async postDecryptionResult(decryption: SealerDecryptionPostBody, vote: string, question: string): Promise<Cipher[]> {
+    console.log('postDecryptionResult', decryption)
+    const body = JSON.stringify({
+      decryption_proof: decryption.decryption_proof,
+      shares: decryption.shares
+    })
+    return axios.post(`${this.baseURL}/decrypt/${vote}/${question}/${decryption.sealer}`, body, {
       headers: { 'Content-Type': 'application/json' }
     })
   }

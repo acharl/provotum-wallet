@@ -28,17 +28,12 @@ export class KeyShareComponent {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: 'Prompt!',
-      message: 'Please enter the Vote ID as well as your Sealer ID to broadcast the public key share',
+      message: 'Please enter the Vote ID to broadcast the public key share',
       inputs: [
         {
           name: 'vote',
           type: 'text',
           placeholder: 'Vote ID'
-        },
-        {
-          name: 'sealer',
-          type: 'text',
-          placeholder: 'Sealer'
         }
       ],
       buttons: [
@@ -54,11 +49,7 @@ export class KeyShareComponent {
           text: 'Ok',
           handler: async (data) => {
             this.apiService
-              .postKeygen(
-                { pk: this.keyShare.pk, proof: { challenge: this.keyShare.proof.challenge, response: this.keyShare.proof.response } },
-                data.vote,
-                data.sealer
-              )
+              .postKeygen(this.keyShare, data.vote)
               .then((result) => {
                 this.busy$.next(false)
                 this.showSweetAlert(result.data)

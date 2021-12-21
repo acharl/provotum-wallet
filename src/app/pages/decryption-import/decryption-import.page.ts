@@ -102,11 +102,6 @@ export class DecryptionImportPage {
           name: 'question',
           type: 'text',
           placeholder: 'Question'
-        },
-        {
-          name: 'sealer',
-          type: 'text',
-          placeholder: 'Sealer ID'
         }
       ],
       buttons: [
@@ -124,7 +119,7 @@ export class DecryptionImportPage {
             this.busy$.next(true)
 
             this.apiService
-              .postDecryptionResult(this.decryptionSync.decryptionPostBody, data.vote, data.question, data.sealer)
+              .postDecryptionResult(this.decryptionSync.decryptionPostBody, data.vote, data.question)
               .then(() => {
                 this.busy$.next(false)
                 this.router.navigateByUrl('/tabs/portfolio')

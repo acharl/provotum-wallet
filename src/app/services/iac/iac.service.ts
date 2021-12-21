@@ -37,7 +37,7 @@ import { BeaconHandler } from './custom-handlers/beacon-handler'
 import { WalletConnectHandler } from './custom-handlers/walletconnect-handler'
 import { transportToInteractionSetting } from 'src/app/models/AirGapMarketWalletGroup'
 import { KeyShareSync, Uint8PublicKeyShareSync } from 'src/app/types/KeyShareSync'
-import { DecryptionPostBody, DecryptionSync } from 'src/app/types/DecryptionPostBody'
+import { SealerDecryptionPostBody, DecryptionSync } from 'src/app/types/DecryptionPostBody'
 
 @Injectable({
   providedIn: 'root'
@@ -163,7 +163,7 @@ export class IACService extends BaseIACService {
     } else {
       // Decrypted Votes
       if (this.router) {
-        const decryptionPostBody: DecryptionPostBody = JSON.parse((deserializedMessages[0].payload as any).message)
+        const decryptionPostBody: SealerDecryptionPostBody = JSON.parse((deserializedMessages[0].payload as any).message)
 
         this.storageService.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
 

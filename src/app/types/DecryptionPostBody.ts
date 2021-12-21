@@ -10,7 +10,10 @@ export interface DecryptionPostBody {
   shares: number[][]
 }
 
+export interface SealerDecryptionPostBody extends DecryptionPostBody {
+  sealer: string
+}
 export interface DecryptionSync {
-  decryptionPostBody: DecryptionPostBody
+  decryptionPostBody: SealerDecryptionPostBody
   interactionSetting?: InteractionSetting
 }

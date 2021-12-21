@@ -96,7 +96,8 @@ import { WidgetSelector } from './widget-selector/widget-selector'
     TranslateModule,
     QRCodeModule,
     AirGapAngularCoreModule,
-    AirGapAngularNgRxModule
+    AirGapAngularNgRxModule,
+    DirectivesModule
   ],
   exports: [
     PortfolioItemComponent,
