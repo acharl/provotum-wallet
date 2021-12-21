@@ -7,11 +7,11 @@ import axios from '../../../../node_modules/axios'
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly baseURL: string = 'https://calm-wildwood-85369.herokuapp.com/https://6b3a-46-101-241-92.ngrok.io'
+  private readonly baseURL: string = 'https://calm-wildwood-85369.herokuapp.com/https://9e3b-46-101-241-92.ngrok.io'
 
   constructor() {}
 
-  async postKeygen(keyShare: Uint8PublicKeyShare, vote: string = 'Vote5', sealer: string = 'bob') {
+  async postKeygen(keyShare: Uint8PublicKeyShare, vote: string, sealer: string) {
     const body = JSON.stringify({
       pk: keyShare.pk,
       proof: keyShare.proof
@@ -23,10 +23,12 @@ export class ApiService {
 
   async getEncryptedCiphers(vote: string, question: string): Promise<Cipher[]> {
     console.log(`Vote ${vote}, Question ${question}`)
-    return this.mockResponse()
-    // return axios.get(`${this.baseURL}/keygen/${vote}/${question}`, {
-    //   headers: { 'Content-Type': 'application/json' }
-    // })
+    // return this.mockResponse()
+    const { data } = await axios.get(`${this.baseURL}/decrypt/${vote}/${question}`, {
+      headers: { 'Content-Type': 'application/json' }
+    })
+    console.log('HARIBOL', data)
+    return data
   }
 
   mockResponse() {

@@ -37,6 +37,7 @@ import { BeaconHandler } from './custom-handlers/beacon-handler'
 import { WalletConnectHandler } from './custom-handlers/walletconnect-handler'
 import { transportToInteractionSetting } from 'src/app/models/AirGapMarketWalletGroup'
 import { KeyShareSync, Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { DecryptionPostBody, DecryptionSync } from 'src/app/types/DecryptionPostBody'
 
 @Injectable({
   providedIn: 'root'
@@ -51,7 +52,7 @@ export class IACService extends BaseIACService {
     private readonly dataService: DataService,
     protected readonly clipboard: ClipboardService,
     private readonly protocolService: ProtocolService,
-    private readonly storageSerivce: WalletStorageService,
+    private readonly storageService: WalletStorageService,
     private readonly priceService: PriceService,
     private readonly router: Router,
     @Inject(APP_CONFIG) appConfig: AppConfig
@@ -84,7 +85,7 @@ export class IACService extends BaseIACService {
   }
 
   public async handleWalletSync(deserializedSyncs: IACMessageDefinitionObject[], transport: IACMessageTransport): Promise<boolean> {
-    this.storageSerivce.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
+    this.storageService.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
 
     const accountSyncs: AccountSync[] = await Promise.all(
       deserializedSyncs.map(async (deserializedSync: IACMessageDefinitionObject) => {
@@ -141,20 +142,40 @@ export class IACService extends BaseIACService {
     deserializedMessages: IACMessageDefinitionObject[],
     transport: IACMessageTransport
   ): Promise<boolean> {
-    const keyShare: Uint8PublicKeyShare = JSON.parse((deserializedMessages[0].payload as any).message)
+    if (deserializedMessages[0].protocol === 'xtz') {
+      // Public Key Share
+      if (this.router) {
+        const keyShare: Uint8PublicKeyShare = JSON.parse((deserializedMessages[0].payload as any).message)
 
-    this.storageSerivce.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
+        this.storageService.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
 
-    const keyShareSync: KeyShareSync = {
-      keyShare,
-      interactionSetting: transportToInteractionSetting(transport)
-    }
+        const keyShareSync: KeyShareSync = {
+          keyShare,
+          interactionSetting: transportToInteractionSetting(transport)
+        }
 
-    if (this.router) {
-      this.dataService.setData(DataServiceKey.SYNC_KEYSHARE, [keyShareSync])
-      this.router.navigateByUrl(`/keyshare-import/${DataServiceKey.SYNC_KEYSHARE}`).catch(handleErrorSentry(ErrorCategory.NAVIGATION))
+        this.dataService.setData(DataServiceKey.SYNC_KEYSHARE, [keyShareSync])
+        this.router.navigateByUrl(`/keyshare-import/${DataServiceKey.SYNC_KEYSHARE}`).catch(handleErrorSentry(ErrorCategory.NAVIGATION))
 
-      return true
+        return true
+      }
+    } else {
+      // Decrypted Votes
+      if (this.router) {
+        const decryptionPostBody: DecryptionPostBody = JSON.parse((deserializedMessages[0].payload as any).message)
+
+        this.storageService.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
+
+        const decryptionSync: DecryptionSync = {
+          decryptionPostBody,
+          interactionSetting: transportToInteractionSetting(transport)
+        }
+
+        this.dataService.setData(DataServiceKey.SYNC_DECRYPTION, [decryptionSync])
+        this.router.navigateByUrl(`/decryption-import/${DataServiceKey.SYNC_DECRYPTION}`).catch(handleErrorSentry(ErrorCategory.NAVIGATION))
+
+        return true
+      }
     }
 
     return false

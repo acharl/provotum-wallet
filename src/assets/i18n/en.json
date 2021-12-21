@@ -290,7 +290,7 @@
   },
   "account-import": {
     "title": "Confirm Import",
-    "import-text": "Would you like to import the following accounts?",
+    "import-text": "Would you like to import the following Public Key Share?",
     "warning": "You have already added this account in AirGap.",
     "syncing_label": "Syncing...",
     "cancel_label": "Cancel",

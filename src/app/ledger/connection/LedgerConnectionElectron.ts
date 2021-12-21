@@ -1,6 +1,5 @@
 // tslint:disable: max-classes-per-file
 import Transport from '@ledgerhq/hw-transport'
-import { DeviceModel } from '@ledgerhq/hw-transport/node_modules/@ledgerhq/devices'
 import { EventEmitter } from 'events'
 
 import {
@@ -16,7 +15,7 @@ import { LedgerConnection, LedgerConnectionDetails, LedgerConnectionType } from 
 class TransportElectron implements Transport {
   exchangeTimeout = 30000
   unresponsiveTimeout = 15000
-  deviceModel: DeviceModel | null | undefined = null
+  deviceModel: null | undefined = null
   _events = new EventEmitter()
   _appAPIlock: string | null = null
 

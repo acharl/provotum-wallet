@@ -3,10 +3,12 @@ import { WalletStorageService } from '../storage/storage'
 import { BehaviorSubject, Observable } from 'rxjs'
 import { AccountSync } from 'src/app/types/AccountSync'
 import { KeyShareSync } from 'src/app/types/KeyShareSync'
+import { DecryptionSync } from 'src/app/types/DecryptionPostBody'
 
 export enum DataServiceKey {
   SYNC_ACCOUNTS = 'sync-accounts',
   SYNC_KEYSHARE = 'sync-keyshare',
+  SYNC_DECRYPTION = 'sync-decryption',
   ACCOUNTS = 'accounts',
   PROTOCOL = 'protocol',
   DETAIL = 'detail',
@@ -24,6 +26,7 @@ export class DataService {
   private readonly data = []
   private accountSyncs$: BehaviorSubject<AccountSync[] | null> = new BehaviorSubject(null)
   private keyShareSyncs$: BehaviorSubject<KeyShareSync[] | null> = new BehaviorSubject(null)
+  private decryptionSyncs$: BehaviorSubject<DecryptionSync[] | null> = new BehaviorSubject(null)
 
   constructor(private readonly storage: WalletStorageService) {}
 
@@ -35,12 +38,19 @@ export class DataService {
     return this.keyShareSyncs$.asObservable()
   }
 
+  public getDecryptionSyncs(): Observable<DecryptionSync[] | null> {
+    return this.decryptionSyncs$.asObservable()
+  }
+
   public setData(id, data) {
     if (id === DataServiceKey.SYNC_ACCOUNTS) {
       this.accountSyncs$.next(data)
     }
     if (id === DataServiceKey.SYNC_KEYSHARE) {
       this.keyShareSyncs$.next(data)
+    }
+    if (id === DataServiceKey.SYNC_DECRYPTION) {
+      this.decryptionSyncs$.next(data)
     }
     this.data[id] = data
   }

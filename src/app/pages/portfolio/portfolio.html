@@ -37,8 +37,14 @@
                 <ion-label>response: {{ _keyShare.proof.response | shortenString }}</ion-label>
               </ion-item> -->
 
-              <ion-item>
-                <ion-button shape="round" size="small" color="primary" slot="end" color="secondary" (click)="sweetalert()">
+              <ion-item *ngIf="!(busy$ | async)">
+                <ion-button shape="round" size="small" color="primary" slot="end" color="secondary" (click)="fetchEncryptedCiphers()">
+                  FETCH & SYNC
+                </ion-button>
+              </ion-item>
+
+              <ion-item *ngIf="busy$ | async; then loading">
+                <ion-button shape="round" size="small" color="primary" slot="end" color="secondary" (click)="fetchEncryptedCiphers()">
                   FETCH & SYNC
                 </ion-button>
               </ion-item>

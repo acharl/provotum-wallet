@@ -65,6 +65,14 @@ const routes: Routes = [
     loadChildren: () => import('./pages/key-share-import/key-share-import.module').then((m) => m.KeyShareImportPageModule)
   },
   {
+    path: 'decryption-import/:id',
+    resolve: {
+      special: DataResolverService
+    },
+    canActivate: [ServiceKeyGuard],
+    loadChildren: () => import('./pages/decryption-import/decryption-import.module').then((m) => m.DecryptionImportPageModule)
+  },
+  {
     path: 'account-transaction-list/:id/:publicKey/:protocolID/:addressIndex',
     canActivate: [ProtocolGuard, ServiceKeyGuard],
 

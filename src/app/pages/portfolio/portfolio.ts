@@ -1,6 +1,6 @@
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
-import { Observable, ReplaySubject, Subscription } from 'rxjs'
+import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs'
 import { AlertController, Platform } from '@ionic/angular'
 
 import { ErrorCategory, handleErrorSentry } from '../../services/sentry-error-handler/sentry-error-handler'
@@ -10,7 +10,6 @@ import { KeyShareService } from 'src/app/services/key-share/key-share.service'
 import { ApiService } from 'src/app/services/api/api.service'
 import { InteractionService } from 'src/app/services/interaction/interaction.service'
 import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, MessageSignRequest } from '@airgap/coinlib-core'
-import Swal from 'sweetalert2'
 
 interface WalletGroup {
   keyShare: Uint8PublicKeyShare
@@ -34,6 +33,7 @@ export class PortfolioPage {
 
   public walletGroups: ReplaySubject<WalletGroup[]> = new ReplaySubject(1)
   public isDesktop: boolean = false
+  public busy$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
 
   constructor(
     private readonly router: Router,
@@ -53,17 +53,7 @@ export class PortfolioPage {
     })
   }
 
-  async fetchEncryptedCiphers() {}
-
-  public sweetalert() {
-    console.log('sweetalert')
-    Swal.fire({
-      title: 'Success',
-      text: 'Sweetalert2 is working fine.',
-      icon: 'success'
-    })
-  }
-  async createAlert() {
+  async fetchEncryptedCiphers() {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: 'Prompt!',
@@ -92,6 +82,8 @@ export class PortfolioPage {
         {
           text: 'Ok',
           handler: async (data) => {
+            this.busy$.next(true)
+
             const encryptedCiphers = await this.apiService.getEncryptedCiphers(data.vote, data.question)
 
             const messageSignRequest: MessageSignRequest = {
@@ -107,7 +99,10 @@ export class PortfolioPage {
               payload: messageSignRequest
             }
 
-            this.interactionService.offlineDeviceSign([signRequestObject])
+            this.interactionService
+              .offlineDeviceSign([signRequestObject])
+              .then(() => this.busy$.next(false))
+              .catch(() => this.busy$.next(false))
           }
         }
       ]
@@ -173,6 +168,7 @@ export class PortfolioPage {
   doRefresh(_event: any) {}
 
   public ngOnDestroy(): void {
+    this.busy$.next(false)
     this.subscription.unsubscribe()
   }
 }
