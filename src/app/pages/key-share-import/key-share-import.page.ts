@@ -51,6 +51,7 @@ export class KeyShareImportPage {
         .subscribe((keyShareSyncs: KeyShareSync[]) => {
           keyShareSyncs.forEach((keyShareSync: KeyShareSync) => {
             console.log('keyShareSync', keyShareSync)
+
             const pk: string | undefined = keyShareSync.keyShare.pk.toString()
             if (!this.keyShareImports.has(pk)) {
               this.keyShareImports.set(pk, [])

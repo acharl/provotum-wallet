@@ -19,7 +19,9 @@
       <ng-container *ngFor="let keyShareImports of keyShareImports | keyvalue" class="ion-margin-bottom">
         <ion-list>
           <ng-container *ngFor="let keyShareImport of keyShareImports.value">
-            {{keyShareImport | json}}
+            <!-- {{keyShareImport | json}} -->
+            <collapsable-json [json]="keyShareImport"></collapsable-json>
+
             <!-- <portfolio-item [wallet]="keyShareImport.wallet"></portfolio-item> -->
             <ion-item *ngIf="keyShareImport.alreadyExists" color="warning" class="ion-margin-top ion-text-wrap">
               {{ 'account-import.warning' | translate }}

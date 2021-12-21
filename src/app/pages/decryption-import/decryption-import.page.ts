@@ -1,9 +1,10 @@
 import { flattened } from '@airgap/angular-core'
 import { Component } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { LoadingController, NavController, Platform } from '@ionic/angular'
-import { Subject } from 'rxjs'
+import { AlertController, LoadingController, NavController, Platform } from '@ionic/angular'
+import { BehaviorSubject, Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
+import { ApiService } from 'src/app/services/api/api.service'
 import { DataService } from 'src/app/services/data/data.service'
 import { ErrorCategory, handleErrorSentry } from 'src/app/services/sentry-error-handler/sentry-error-handler'
 import { DecryptionSync } from 'src/app/types/DecryptionPostBody'
@@ -22,6 +23,7 @@ export class DecryptionImportPage {
   private get allDecryptionImports(): DecryptionImport[] {
     return flattened(Array.from(this.decryptionImports.values()))
   }
+  public busy$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false)
 
   public loading: HTMLIonLoadingElement
 
@@ -33,7 +35,9 @@ export class DecryptionImportPage {
     private readonly navController: NavController,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly dataService: DataService // private readonly ngZone: NgZone
+    private readonly alertController: AlertController,
+    private readonly dataService: DataService, // private readonly ngZone: NgZone
+    private readonly apiService: ApiService
   ) {}
 
   public async ionViewWillEnter(): Promise<void> {
@@ -47,8 +51,7 @@ export class DecryptionImportPage {
         .getDecryptionSyncs()
         .pipe(takeUntil(this.ngDestroyed$))
         .subscribe((decryptionSyncs: DecryptionSync[]) => {
-          console.log('decryptionSync', decryptionSyncs)
-
+          this.decryptionSync = decryptionSyncs[0]
           decryptionSyncs.forEach((decryptionSync: DecryptionSync) => {
             const challenge: string | undefined = decryptionSync.decryptionPostBody.decryption_proof.challenge
             if (!this.decryptionImports.has(challenge)) {
@@ -84,21 +87,57 @@ export class DecryptionImportPage {
     this.navController.back()
   }
 
-  public async import(): Promise<void> {
-    console.log('HARIBOL')
-    // const addKeyShareInfos = this.allDecryptionImports.map((decryptionImport: DecryptionImport) => {
-    //   return {
-    //     keyShare: decryptionImport.keyShare,
-    //     interactionSetting: decryptionImport.interactionSetting,
-    //     options: { override: true }
-    //   }
-    // })
+  async broadcast(): Promise<void> {
+    const alert = await this.alertController.create({
+      cssClass: 'my-custom-class',
+      header: 'Prompt!', // TODO JGD change this
+      message: 'Please enter the Vote ID, the Question as well as your Sealer ID for which you want to publish a partial decryption result',
+      inputs: [
+        {
+          name: 'vote',
+          type: 'text',
+          placeholder: 'Vote ID'
+        },
+        {
+          name: 'question',
+          type: 'text',
+          placeholder: 'Question'
+        },
+        {
+          name: 'sealer',
+          type: 'text',
+          placeholder: 'Sealer ID'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel')
+          }
+        },
+        {
+          text: 'Ok',
+          handler: async (data) => {
+            this.busy$.next(true)
 
-    // await this.keyShareService.addKeyShares(addKeyShareInfos)
-    // // addKeyShareInfos.forEach((addKeyShareInfo) => {
-    // //   this.keyShareService.setInteractionSettingForWalletGroupByWallet(addKeyShareInfo.keyShare, addKeyShareInfo.interactionSetting)
-    // // })
+            this.apiService
+              .postDecryptionResult(this.decryptionSync.decryptionPostBody, data.vote, data.question, data.sealer)
+              .then(() => {
+                this.busy$.next(false)
+                this.router.navigateByUrl('/tabs/portfolio')
+              })
+              .catch(() => {
+                this.busy$.next(false)
+                this.router.navigateByUrl('/tabs/portfolio')
+              })
+          }
+        }
+      ]
+    })
 
-    await this.router.navigateByUrl('/tabs/portfolio')
+    await alert.present()
   }
 }

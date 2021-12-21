@@ -4,7 +4,7 @@
       <ion-buttons slot="start">
         <ion-back-button defaultHref="/"></ion-back-button>
       </ion-buttons>
-      <ion-title>{{ 'account-import.title' | translate }}</ion-title>
+      <ion-title>{{ 'decryption-import.title' | translate }}</ion-title>
     </ion-toolbar>
   </ion-grid>
 </ion-header>
@@ -12,17 +12,17 @@
 <ion-content class="ion-padding">
   <ion-grid fixed="true" class="ion-no-padding">
     <ion-row>
-      <p>{{ 'account-import.import-text' | translate }}</p>
+      <p>{{ 'decryption-import.import-text' | translate }}</p>
     </ion-row>
 
     <ion-list>
       <ng-container *ngFor="let decryptionImports of decryptionImports | keyvalue" class="ion-margin-bottom">
         <ion-list>
           <ng-container *ngFor="let decryptionImport of decryptionImports.value">
-            {{decryptionImport | json}}
+            <collapsable-json [json]="decryptionImport"></collapsable-json>
             <!-- <portfolio-item [wallet]="decryptionImport.wallet"></portfolio-item> -->
             <ion-item *ngIf="decryptionImport.alreadyExists" color="warning" class="ion-margin-top ion-text-wrap">
-              {{ 'account-import.warning' | translate }}
+              {{ 'decryption-import.warning' | translate }}
             </ion-item>
           </ng-container>
         </ion-list>
@@ -32,10 +32,10 @@
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-button id="dismiss" shape="round" color="secondary" (click)="dismiss()">
-      {{ 'account-import.cancel_label' | translate }}
+      {{ 'decryption-import.cancel_label' | translate }}
     </ion-button>
-    <ion-button id="import" shape="round" color="primary" (click)="import()">
-      {{ 'account-import.import_label' | translate }}
+    <ion-button id="import" shape="round" color="primary" (click)="broadcast()">
+      {{ 'decryption-import.import_label' | translate }}
     </ion-button>
   </ion-fab>
 </ion-content>

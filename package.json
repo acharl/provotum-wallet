@@ -126,6 +126,7 @@
     "es6-promise-plugin": "^4.2.2",
     "html-loader": "^2.1.2",
     "ionicons": "^5.5.1",
+    "json-formatter-js": "^2.3.4",
     "localforage-cordovasqlitedriver": "^1.7.0",
     "moment": "^2.29.1",
     "myetherwallet-blockies": "^0.1.1",

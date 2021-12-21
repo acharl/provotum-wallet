@@ -9,6 +9,7 @@ import { TranslateModule } from '@ngx-translate/core'
 import { QRCodeModule } from 'angularx-qrcode'
 import { ChartsModule } from 'ng2-charts'
 import { MomentModule } from 'ngx-moment'
+import { DirectivesModule } from '../directives/directives.module'
 
 import { PipesModule } from '../pipes/pipes.module'
 
@@ -16,6 +17,7 @@ import { AccountEditPopoverComponent } from './account-edit-popover/account-edit
 import { AmountComponent } from './amount/amount.component'
 import { CardActionableComponent } from './card-actionable/card-actionable'
 import { ChartComponent } from './chart/chart.component'
+import { CollapsableJSONComponent } from './collapsable-json/collapsable-json.component'
 import { CurrencyItemComponent } from './currency-item/currency-item'
 import { CurrentWalletGroupComponent } from './current-wallet-group/current-wallet-group.component'
 import { DappPeerComponent } from './dapp-peer/dapp-peer.component'
@@ -78,7 +80,8 @@ import { WidgetSelector } from './widget-selector/widget-selector'
     WidgetRewardList,
     WidgetOptionButtonGroup,
     KeyShareComponent,
-    LoadingItemComponent
+    LoadingItemComponent,
+    CollapsableJSONComponent
   ],
   imports: [
     IonicModule,
@@ -86,7 +89,7 @@ import { WidgetSelector } from './widget-selector/widget-selector'
     FormsModule,
     ReactiveFormsModule,
     ReactiveComponentModule,
-
+    DirectivesModule,
     PipesModule,
     MomentModule,
     ChartsModule,
@@ -116,7 +119,6 @@ import { WidgetSelector } from './widget-selector/widget-selector'
     TransactionItemComponent,
     FeeComponent,
     FromToComponent,
-
     WidgetSelector,
     WidgetAccount,
     WidgetAccountSummary,
@@ -127,7 +129,8 @@ import { WidgetSelector } from './widget-selector/widget-selector'
     WidgetRewardList,
     WidgetOptionButtonGroup,
     KeyShareComponent,
-    LoadingItemComponent
+    LoadingItemComponent,
+    CollapsableJSONComponent
   ],
   entryComponents: [AccountEditPopoverComponent, DelegateEditPopoverComponent, DappPeerComponent]
 })

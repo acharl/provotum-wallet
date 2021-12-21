@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Cipher } from 'src/app/types/Cipher'
+import { DecryptionPostBody } from 'src/app/types/DecryptionPostBody'
 import { Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
 import axios from '../../../../node_modules/axios'
 
@@ -22,13 +23,20 @@ export class ApiService {
   }
 
   async getEncryptedCiphers(vote: string, question: string): Promise<Cipher[]> {
-    console.log(`Vote ${vote}, Question ${question}`)
     // return this.mockResponse()
     const { data } = await axios.get(`${this.baseURL}/decrypt/${vote}/${question}`, {
       headers: { 'Content-Type': 'application/json' }
     })
     console.log('HARIBOL', data)
     return data
+  }
+
+  async postDecryptionResult(decryption: DecryptionPostBody, vote: string, question: string, sealer: string): Promise<Cipher[]> {
+    const body = JSON.stringify(decryption)
+
+    return axios.post(`${this.baseURL}/decrypt/${vote}/${question}/${sealer}`, body, {
+      headers: { 'Content-Type': 'application/json' }
+    })
   }
 
   mockResponse() {

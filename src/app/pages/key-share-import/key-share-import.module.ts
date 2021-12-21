@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { IonicModule } from '@ionic/angular'
 import { KeyShareImportPage } from './key-share-import.page'
-import { ComponentsModule } from '@airgap/angular-core'
+import { ComponentsModule } from '../../components/components.module'
 import { TranslateModule } from '@ngx-translate/core'
 import { RouterModule } from '@angular/router'
 

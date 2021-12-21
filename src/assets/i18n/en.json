@@ -296,6 +296,15 @@
     "cancel_label": "Cancel",
     "import_label": "Import"
   },
+
+  "decryption-import": {
+    "title": "Confirm Broadcast",
+    "import-text": "Would you like to broadcast this partial decryption result to the Public Bulletin Board?",
+    "warning": "You have already added this account in AirGap.",
+    "syncing_label": "Syncing...",
+    "cancel_label": "Cancel",
+    "import_label": "BROADCAST"
+  },
   "account-activate": {
     "title": "Add Accounts",
     "message": "Select <strong>{{ protocol }}</strong> accounts to add.",

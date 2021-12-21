@@ -78,6 +78,7 @@ import { InteractionService } from './services/interaction/interaction.service'
 import { SaplingNative } from './capacitor-plugins/definitions'
 import { AppLauncher } from '@capacitor/app-launcher'
 import { Filesystem } from '@capacitor/filesystem'
+import { DirectivesModule } from './directives/directives.module'
 
 export function createTranslateLoader(http: HttpClient): AirGapTranslateLoader {
   return new AirGapTranslateLoader(http, { prefix: './assets/i18n/', suffix: '.json' })
@@ -94,6 +95,7 @@ export function createTranslateLoader(http: HttpClient): AirGapTranslateLoader {
     ReactiveFormsModule,
     FormsModule,
     CommonModule,
+    DirectivesModule,
     AirGapAngularCoreModule,
     AirGapAngularNgRxModule,
     StoreModule.forRoot(fromRoot.reducers, {

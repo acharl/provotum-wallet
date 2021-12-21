@@ -36,7 +36,7 @@ import { AddressHandler } from './custom-handlers/address-handler'
 import { BeaconHandler } from './custom-handlers/beacon-handler'
 import { WalletConnectHandler } from './custom-handlers/walletconnect-handler'
 import { transportToInteractionSetting } from 'src/app/models/AirGapMarketWalletGroup'
-import { KeyShareSync, Uint8PublicKeyShare } from 'src/app/types/KeyShareSync'
+import { KeyShareSync, Uint8PublicKeyShareSync } from 'src/app/types/KeyShareSync'
 import { DecryptionPostBody, DecryptionSync } from 'src/app/types/DecryptionPostBody'
 
 @Injectable({
@@ -145,13 +145,14 @@ export class IACService extends BaseIACService {
     if (deserializedMessages[0].protocol === 'xtz') {
       // Public Key Share
       if (this.router) {
-        const keyShare: Uint8PublicKeyShare = JSON.parse((deserializedMessages[0].payload as any).message)
+        const keyShare: Uint8PublicKeyShareSync = JSON.parse((deserializedMessages[0].payload as any).message)
 
         this.storageService.set(WalletStorageKey.DEEP_LINK, true).catch(handleErrorSentry(ErrorCategory.STORAGE))
 
         const keyShareSync: KeyShareSync = {
           keyShare,
-          interactionSetting: transportToInteractionSetting(transport)
+          interactionSetting: transportToInteractionSetting(transport),
+          sealer: 'bob'
         }
 
         this.dataService.setData(DataServiceKey.SYNC_KEYSHARE, [keyShareSync])

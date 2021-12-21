@@ -1,7 +1,7 @@
 import { IACMessageTransport } from '@airgap/angular-core'
 import { AirGapMarketWallet } from '@airgap/coinlib-core'
 import { AirGapWalletStatus } from '@airgap/coinlib-core/wallet/AirGapWallet'
-import { Uint8PublicKeyShare } from '../types/KeyShareSync'
+import { Uint8PublicKeyShareSync } from '../types/KeyShareSync'
 export interface SerializedAirGapMarketWalletGroup {
   id: string
   label: string
@@ -14,7 +14,7 @@ export interface SerializedPublicKeyShareGroup {
   id: string
   label: string
   interactionSetting: InteractionSetting
-  keyShares: Uint8PublicKeyShare[]
+  keyShares: Uint8PublicKeyShareSync[]
 }
 
 export enum InteractionSetting {
@@ -136,7 +136,7 @@ export class PublicKeyShareGroup {
     public readonly id: string | undefined,
     label: string | undefined,
     interactionSetting: InteractionSetting | undefined,
-    public readonly keyShares: Uint8PublicKeyShare[],
+    public readonly keyShares: Uint8PublicKeyShareSync[],
     public readonly transient: boolean = false
   ) {
     this.updateLabel(label)
@@ -156,11 +156,11 @@ export class PublicKeyShareGroup {
       id: this.id,
       label: this.label,
       interactionSetting: this.interactionSetting,
-      keyShares: this.keyShares.map((keyShare: Uint8PublicKeyShare) => keyShare)
+      keyShares: this.keyShares.map((keyShare: Uint8PublicKeyShareSync) => keyShare)
     }
   }
 
-  public includesKeyShare(keyShare: Uint8PublicKeyShare) {
+  public includesKeyShare(keyShare: Uint8PublicKeyShareSync) {
     return this.keyShares.includes(keyShare)
   }
 }
