@@ -20,7 +20,6 @@ export class DappSettingsPage implements OnInit {
 
   public async loadPeers(): Promise<void> {
     this.connectedPeers = await this.beaconService.getPeers()
-    this.connectedServer = await this.beaconService.getConnectedServer()
   }
 
   public async removePeer(peer: P2PPairingRequest): Promise<void> {

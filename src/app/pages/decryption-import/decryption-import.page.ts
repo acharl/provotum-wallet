@@ -8,6 +8,7 @@ import { ApiService } from 'src/app/services/api/api.service'
 import { DataService } from 'src/app/services/data/data.service'
 import { ErrorCategory, handleErrorSentry } from 'src/app/services/sentry-error-handler/sentry-error-handler'
 import { DecryptionSync } from 'src/app/types/DecryptionPostBody'
+import Swal from 'sweetalert2'
 
 interface DecryptionImport extends DecryptionSync {
   alreadyExists: boolean
@@ -91,7 +92,7 @@ export class DecryptionImportPage {
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: 'Prompt!', // TODO JGD change this
-      message: 'Please enter the Vote ID, the Question as well as your Sealer ID for which you want to publish a partial decryption result',
+      message: 'Please enter the Vote ID and the Question for which you want to publish a partial decryption result',
       inputs: [
         {
           name: 'vote',
@@ -120,8 +121,10 @@ export class DecryptionImportPage {
 
             this.apiService
               .postDecryptionResult(this.decryptionSync.decryptionPostBody, data.vote, data.question)
-              .then(() => {
+              .then((result) => {
                 this.busy$.next(false)
+                this.showSweetAlert(result.data)
+
                 this.router.navigateByUrl('/tabs/portfolio')
               })
               .catch(() => {
@@ -134,5 +137,13 @@ export class DecryptionImportPage {
     })
 
     await alert.present()
+  }
+
+  private async showSweetAlert(message: string): Promise<void> {
+    Swal.fire({
+      title: 'Success',
+      text: `${message}`,
+      icon: 'success'
+    })
   }
 }

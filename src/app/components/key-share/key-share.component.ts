@@ -3,7 +3,7 @@ import { AlertController } from '@ionic/angular'
 import { BehaviorSubject } from 'rxjs'
 import { ApiService } from 'src/app/services/api/api.service'
 import { Uint8PublicKeyShareSync } from 'src/app/types/KeyShareSync'
-// import Swal from 'sweetalert2'
+import Swal from 'sweetalert2'
 
 @Component({
   selector: 'app-key-share',
@@ -20,11 +20,6 @@ export class KeyShareComponent {
 
   async sync() {
     this.busy$.next(true)
-    // let keyShare = { pk: [], proof: { challenge: [], response: [] } }
-    // keyShare.pk = Array.from(Uint8Array.from(Buffer.from(this._keyShare.pk, 'hex')))
-    // keyShare.proof.challenge = Array.from(Uint8Array.from(Buffer.from(this._keyShare.proof.challenge, 'hex')))
-    // keyShare.proof.response = Array.from(Uint8Array.from(Buffer.from(this._keyShare.proof.response, 'hex')))
-
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: 'Prompt!',
@@ -63,11 +58,11 @@ export class KeyShareComponent {
     await alert.present()
   }
 
-  private async showSweetAlert(_message: string): Promise<void> {
-    // Swal.fire({
-    //   title: 'Success',
-    //   text: `${message}`,
-    //   icon: 'success'
-    // })
+  private async showSweetAlert(message: string): Promise<void> {
+    Swal.fire({
+      title: 'Success',
+      text: `${message}`,
+      icon: 'success'
+    })
   }
 }

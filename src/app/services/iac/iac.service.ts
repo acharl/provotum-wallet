@@ -143,6 +143,7 @@ export class IACService extends BaseIACService {
     transport: IACMessageTransport
   ): Promise<boolean> {
     if (deserializedMessages[0].protocol === 'xtz') {
+      // TODO JGD
       // Public Key Share
       if (this.router) {
         const keyShare: Uint8PublicKeyShareSync = JSON.parse((deserializedMessages[0].payload as any).message)
