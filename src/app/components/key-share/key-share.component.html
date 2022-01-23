@@ -19,15 +19,6 @@
         generation proof to the Public Bulletin Board.
       </h2>
     </ion-text>
-    <!-- <ion-item>
-      <ion-label>pk: {{ _keyShare.pk | shortenString }}</ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>challenge: {{ _keyShare.proof.challenge | shortenString }}</ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>response: {{ _keyShare.proof.response | shortenString }}</ion-label>
-    </ion-item> -->
 
     <ion-item *ngIf="!(busy$ | async)">
       <ion-button shape="round" size="small" color="primary" slot="end" color="secondary" (click)="sync()">BROADCAST</ion-button>

@@ -4,6 +4,7 @@ import { AlertController } from '@ionic/angular'
 import { BehaviorSubject } from 'rxjs'
 import { ApiService } from 'src/app/services/api/api.service'
 import { InteractionService } from 'src/app/services/interaction/interaction.service'
+import Swal from 'sweetalert2'
 
 @Component({
   selector: 'app-sync',
@@ -67,13 +68,23 @@ export class SyncPage {
             this.interactionService
               .offlineDeviceSign([signRequestObject])
               .then(() => this.busy$.next(false))
-              .catch(() => this.busy$.next(false))
+              .catch((err) => {
+                this.showError(err)
+                this.busy$.next(false)
+              })
           }
         }
       ]
     })
 
     await alert.present()
+  }
+  private async showError(message: string): Promise<void> {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: `${message}`
+    })
   }
 
   public ngOnDestroy(): void {

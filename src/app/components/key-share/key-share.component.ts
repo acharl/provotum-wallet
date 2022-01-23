@@ -37,7 +37,7 @@ export class KeyShareComponent {
           role: 'cancel',
           cssClass: 'secondary',
           handler: () => {
-            console.log('Confirm Cancel')
+            this.busy$.next(false)
           }
         },
         {
@@ -49,7 +49,10 @@ export class KeyShareComponent {
                 this.busy$.next(false)
                 this.showSweetAlert(result.data)
               })
-              .catch(() => this.busy$.next(false))
+              .catch((err) => {
+                this.showError(err)
+                this.busy$.next(false)
+              })
           }
         }
       ]
@@ -63,6 +66,14 @@ export class KeyShareComponent {
       title: 'Success',
       text: `${message}`,
       icon: 'success'
+    })
+  }
+
+  private async showError(message: string): Promise<void> {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: `${message}`
     })
   }
 }

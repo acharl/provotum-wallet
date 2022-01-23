@@ -1,46 +1,13 @@
 import {
-  AddressService,
-  AppInfoPlugin,
-  APP_INFO_PLUGIN,
   APP_PLUGIN,
-  ExternalAliasResolver,
   IACMessageTransport,
   LanguageService,
-  ProtocolService,
   SerializerService,
   SPLASH_SCREEN_PLUGIN,
   STATUS_BAR_PLUGIN
 } from '@airgap/angular-core'
-import {
-  AirGapMarketWallet,
-  generateId,
-  IACMessageType,
-  IAirGapTransaction,
-  ICoinProtocol,
-  ICoinSubProtocol,
-  MainProtocolSymbols,
-  NetworkType,
-  TezblockBlockExplorer,
-  TezosFA1p2Protocol,
-  TezosFA2Protocol,
-  TezosFA2ProtocolConfig,
-  TezosFA2ProtocolOptions,
-  TezosFAProtocolConfig,
-  TezosFAProtocolOptions,
-  TezosKtProtocol,
-  TezosNetwork,
-  TezosProtocol,
-  TezosProtocolNetwork,
-  TezosProtocolNetworkExtras,
-  TezosProtocolOptions,
-  TezosSaplingExternalMethodProvider,
-  TezosShieldedTezProtocol
-} from '@airgap/coinlib-core'
-import { TezosDomains } from '@airgap/coinlib-core/protocols/tezos/domains/TezosDomains'
-import {
-  TezosSaplingProtocolOptions,
-  TezosShieldedTezProtocolConfig
-} from '@airgap/coinlib-core/protocols/tezos/sapling/TezosSaplingProtocolOptions'
+import { AirGapMarketWallet, generateId, IACMessageType, IAirGapTransaction } from '@airgap/coinlib-core'
+
 import { AfterViewInit, Component, Inject, NgZone } from '@angular/core'
 import { Router } from '@angular/router'
 import { AppPlugin, URLOpenListenerEvent } from '@capacitor/app'
@@ -54,11 +21,8 @@ import { AccountProvider } from './services/account/account.provider'
 import { DataService, DataServiceKey } from './services/data/data.service'
 import { IACService } from './services/iac/iac.service'
 import { PushProvider } from './services/push/push'
-import { SaplingNativeService } from './services/sapling-native/sapling-native.service'
-import { ErrorCategory, handleErrorSentry, setSentryRelease, setSentryUser } from './services/sentry-error-handler/sentry-error-handler'
+import { ErrorCategory, handleErrorSentry } from './services/sentry-error-handler/sentry-error-handler'
 import { WalletStorageKey, WalletStorageService } from './services/storage/storage'
-import { WalletconnectService } from './services/walletconnect/walletconnect.service'
-import { faProtocolSymbol } from './types/GenericProtocolSymbols'
 import { generateGUID } from './utils/utils'
 
 @Component({
@@ -74,30 +38,32 @@ export class AppComponent implements AfterViewInit {
     private readonly translate: TranslateService,
     private readonly languageService: LanguageService,
     private readonly iacService: IACService,
-    private readonly protocolService: ProtocolService,
     private readonly storageProvider: WalletStorageService,
     private readonly accountProvider: AccountProvider,
-    private readonly addressService: AddressService,
     private readonly serializerService: SerializerService,
     private readonly pushProvider: PushProvider,
-    private readonly walletconnectService: WalletconnectService,
     private readonly router: Router,
     private readonly dataService: DataService,
     private readonly config: Config,
     private readonly ngZone: NgZone,
-    private readonly saplingNativeService: SaplingNativeService,
     @Inject(APP_PLUGIN) private readonly app: AppPlugin,
-    @Inject(APP_INFO_PLUGIN) private readonly appInfo: AppInfoPlugin,
     @Inject(SPLASH_SCREEN_PLUGIN) private readonly splashScreen: SplashScreenPlugin,
     @Inject(STATUS_BAR_PLUGIN) private readonly statusBar: StatusBarPlugin
   ) {
-    this.initializeApp().catch(handleErrorSentry(ErrorCategory.OTHER))
+    this.initializeApp().catch(() => {
+      handleErrorSentry(ErrorCategory.OTHER)
+    })
     this.isMobile = this.platform.is('android') || this.platform.is('ios')
     this.isElectron = this.platform.is('electron')
   }
 
   public async initializeApp(): Promise<void> {
-    await Promise.all([this.initializeTranslations(), this.platform.ready(), this.initializeProtocols(), this.initializeWalletConnect()])
+    await this.initializeTranslations()
+
+    await this.platform.ready()
+    console.log('####### 0 #######')
+
+    // await Promise.all([this.initializeTranslations(), this.platform.ready(), this.initializeProtocols(), this.initializeWalletConnect()])
 
     if (this.platform.is('hybrid')) {
       await Promise.all([
@@ -107,21 +73,14 @@ export class AppComponent implements AfterViewInit {
 
         this.pushProvider.initPush()
       ])
-
-      this.appInfo
-        .get()
-        .then((appInfo: { appName: string; packageName: string; versionName: string; versionCode: number }) => {
-          setSentryRelease(`app_${appInfo.versionName}`)
-        })
-        .catch(handleErrorSentry(ErrorCategory.CORDOVA_PLUGIN))
     }
+    console.log('####### 1 #######')
 
     let userId: string = await this.storageProvider.get(WalletStorageKey.USER_ID)
     if (!userId) {
       userId = generateGUID()
       this.storageProvider.set(WalletStorageKey.USER_ID, userId).catch(handleErrorSentry(ErrorCategory.STORAGE))
     }
-    setSentryUser(userId)
 
     const url: URL = new URL(location.href)
 
@@ -135,6 +94,7 @@ export class AppComponent implements AfterViewInit {
         }
       })
     }
+    console.log('####### 2 #######')
   }
 
   public async ngAfterViewInit(): Promise<void> {
@@ -198,182 +158,5 @@ export class AppComponent implements AfterViewInit {
       supportedLanguages: ['en', 'de', 'zh-cn'],
       defaultLanguage: 'en'
     })
-  }
-  private async initializeWalletConnect(): Promise<void> {
-    this.walletconnectService.initWalletConnect()
-  }
-
-  private async initializeProtocols(): Promise<void> {
-    const edonetNetwork: TezosProtocolNetwork = new TezosProtocolNetwork(
-      'Edonet',
-      NetworkType.TESTNET,
-      'https://tezos-edonet-node.prod.gke.papers.tech',
-      new TezblockBlockExplorer('https//edonet.tezblock.io'),
-      new TezosProtocolNetworkExtras(
-        TezosNetwork.EDONET,
-        'https://tezos-edonet-conseil.prod.gke.papers.tech',
-        TezosNetwork.EDONET,
-        'airgap00391'
-      )
-    )
-    const edonetProtocol: TezosProtocol = new TezosProtocol(new TezosProtocolOptions(edonetNetwork))
-
-    const florencenetNetwork: TezosProtocolNetwork = new TezosProtocolNetwork(
-      'Florencenet',
-      NetworkType.TESTNET,
-      'https://tezos-florencenet-node.prod.gke.papers.tech',
-      new TezblockBlockExplorer('https//florencenet.tezblock.io'),
-      new TezosProtocolNetworkExtras(
-        TezosNetwork.FLORENCENET,
-        'https://tezos-florencenet-conseil.prod.gke.papers.tech',
-        TezosNetwork.FLORENCENET,
-        'airgap00391'
-      )
-    )
-    const florencenetProtocol: TezosProtocol = new TezosProtocol(new TezosProtocolOptions(florencenetNetwork))
-
-    const granadanetNetwork: TezosProtocolNetwork = new TezosProtocolNetwork(
-      'Granadanet',
-      NetworkType.TESTNET,
-      'https://tezos-granadanet-node.prod.gke.papers.tech',
-      new TezblockBlockExplorer('https//granadanet.tezblock.io'),
-      new TezosProtocolNetworkExtras(
-        TezosNetwork.GRANADANET,
-        'https://tezos-granadanet-conseil.prod.gke.papers.tech',
-        TezosNetwork.MAINNET,
-        'airgap00391'
-      )
-    )
-
-    const granadanetProtocol: TezosProtocol = new TezosProtocol(new TezosProtocolOptions(granadanetNetwork))
-
-    const externalMethodProvider:
-      | TezosSaplingExternalMethodProvider
-      | undefined = await this.saplingNativeService.createExternalMethodProvider()
-
-    const shieldedTezProtocol: TezosShieldedTezProtocol = new TezosShieldedTezProtocol(
-      new TezosSaplingProtocolOptions(
-        granadanetNetwork,
-        new TezosShieldedTezProtocolConfig(undefined, undefined, undefined, externalMethodProvider)
-      )
-    )
-
-    this.protocolService.init({
-      extraActiveProtocols: [edonetProtocol, florencenetProtocol, granadanetProtocol, shieldedTezProtocol],
-      extraPassiveSubProtocols: [[granadanetProtocol, new TezosKtProtocol(new TezosProtocolOptions(granadanetNetwork))]]
-    })
-
-    await Promise.all([this.getGenericSubProtocols(), this.initializeTezosDomains()])
-  }
-
-  private async getGenericSubProtocols(): Promise<void> {
-    const genericSubProtocols = await this.storageProvider.get(WalletStorageKey.GENERIC_SUBPROTOCOLS)
-    const identifiersWithOptions = Object.entries(genericSubProtocols)
-    const protocols = identifiersWithOptions
-      .map(([identifier, options]) => {
-        if (identifier.startsWith(MainProtocolSymbols.XTZ)) {
-          const tezosOptions = options as TezosProtocolOptions
-          const tezosProtocolNetwork = new TezosProtocolNetwork(
-            tezosOptions.network.name,
-            tezosOptions.network.type,
-            tezosOptions.network.rpcUrl,
-            tezosOptions.network.blockExplorer,
-            new TezosProtocolNetworkExtras(
-              tezosOptions.network.extras.network,
-              tezosOptions.network.extras.conseilUrl,
-              tezosOptions.network.extras.conseilNetwork,
-              tezosOptions.network.extras.conseilApiKey
-            )
-          )
-          if (identifier.startsWith(faProtocolSymbol('1.2'))) {
-            const faOptions = tezosOptions as TezosFAProtocolOptions
-
-            return new TezosFA1p2Protocol(
-              new TezosFAProtocolOptions(
-                tezosProtocolNetwork,
-                new TezosFAProtocolConfig(
-                  faOptions.config.contractAddress,
-                  faOptions.config.identifier,
-                  faOptions.config.symbol,
-                  faOptions.config.name,
-                  faOptions.config.marketSymbol,
-                  faOptions.config.feeDefaults,
-                  faOptions.config.decimals,
-                  faOptions.config.tokenMetadataBigMapID
-                )
-              )
-            )
-          } else if (identifier.startsWith(faProtocolSymbol('2'))) {
-            const fa2Options = tezosOptions as TezosFA2ProtocolOptions
-
-            return new TezosFA2Protocol(
-              new TezosFA2ProtocolOptions(
-                tezosProtocolNetwork,
-                new TezosFA2ProtocolConfig(
-                  fa2Options.config.contractAddress,
-                  fa2Options.config.identifier,
-                  fa2Options.config.symbol,
-                  fa2Options.config.name,
-                  fa2Options.config.marketSymbol,
-                  fa2Options.config.feeDefaults,
-                  fa2Options.config.decimals,
-                  fa2Options.config.defaultTokenID,
-                  fa2Options.config.tokenMetadataBigMapID,
-                  fa2Options.config.ledgerBigMapID,
-                  fa2Options.config.totalSupplyBigMapID
-                )
-              )
-            )
-          }
-        }
-
-        return undefined
-      })
-      .filter((protocol) => protocol !== undefined)
-
-    await this.protocolService.addActiveSubProtocols(protocols)
-  }
-
-  private async initializeTezosDomains(): Promise<void> {
-    const tezosDomainsAddresses: Record<TezosNetwork, string | undefined> = {
-      [TezosNetwork.MAINNET]: 'KT1GBZmSxmnKJXGMdMLbugPfLyUPmuLSMwKS',
-      [TezosNetwork.EDONET]: 'KT1JJbWfW8CHUY95hG9iq2CEMma1RiKhMHDR',
-      [TezosNetwork.FLORENCENET]: 'KT1PfBfkfUuvQRN8zuCAyp5MHjNrQqgevS9p',
-      [TezosNetwork.GRANADANET]: 'KT1Ch6PstAQG32uNfQJUSL2bf2WvimvY5umk'
-    }
-
-    const tezosNetworks: TezosProtocolNetwork[] = (await this.protocolService.getNetworksForProtocol(
-      MainProtocolSymbols.XTZ
-    )) as TezosProtocolNetwork[]
-
-    const tezosDomainsWithNetwork: [TezosProtocolNetwork, TezosDomains][] = tezosNetworks
-      .map((network: TezosProtocolNetwork) => {
-        const contractAddress: string | undefined = tezosDomainsAddresses[network.extras.network]
-
-        return contractAddress !== undefined
-          ? ([network, new TezosDomains(network, contractAddress)] as [TezosProtocolNetwork, TezosDomains])
-          : undefined
-      })
-      .filter((tezosDomainsWithNetwork: [TezosProtocolNetwork, TezosDomains] | undefined) => tezosDomainsWithNetwork !== undefined)
-
-    await Promise.all(
-      tezosDomainsWithNetwork.map(async ([network, tezosDomains]: [TezosProtocolNetwork, TezosDomains]) => {
-        const externalAliasResolver: ExternalAliasResolver = {
-          validateReceiver: async (receiver: string): Promise<boolean> => (await tezosDomains.nameToAddress(receiver)) !== undefined,
-          resolveAlias: tezosDomains.nameToAddress.bind(tezosDomains),
-          getAlias: tezosDomains.addressToName.bind(tezosDomains)
-        }
-
-        const [tezosProtocol, tezosSubProtocols]: [ICoinProtocol, ICoinSubProtocol[]] = await Promise.all([
-          this.protocolService.getProtocol(MainProtocolSymbols.XTZ, network),
-          this.protocolService.getSubProtocols(MainProtocolSymbols.XTZ, network)
-        ])
-
-        this.addressService.registerExternalAliasResolver(externalAliasResolver, tezosProtocol)
-        tezosSubProtocols.forEach((subProtocol: ICoinSubProtocol) => {
-          this.addressService.registerExternalAliasResolver(externalAliasResolver, subProtocol)
-        })
-      })
-    )
   }
 }

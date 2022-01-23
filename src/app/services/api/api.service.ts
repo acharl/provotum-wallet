@@ -8,8 +8,8 @@ import axios from '../../../../node_modules/axios'
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly baseURL: string = 'https://calm-wildwood-85369.herokuapp.com/https://9d33-46-101-241-92.ngrok.io'
-
+  private readonly corsURL: string = 'https://calm-wildwood-85369.herokuapp.com'
+  private readonly baseURL: string = 'YOUR_UNIQUE_URL.ngrok.io'
   constructor() {}
 
   async postKeygen(keyShare: Uint8PublicKeyShareSync, vote: string) {
@@ -17,25 +17,24 @@ export class ApiService {
       pk: keyShare.pk,
       proof: keyShare.proof
     })
-    return axios.post(`${this.baseURL}/keygen/${vote}/${keyShare.sealer}`, body, {
+    return axios.post(`${this.corsURL}/${this.baseURL}/keygen/${vote}/${keyShare.sealer}`, body, {
       headers: { 'Content-Type': 'application/json' }
     })
   }
 
   async getEncryptedCiphers(vote: string, question: string): Promise<Cipher[]> {
-    const { data } = await axios.get(`${this.baseURL}/decrypt/${vote}/${question}`, {
+    const { data } = await axios.get(`${this.corsURL}/${this.baseURL}/decrypt/${vote}/${question}`, {
       headers: { 'Content-Type': 'application/json' }
     })
     return data
   }
 
   async postDecryptionResult(decryption: SealerDecryptionPostBody, vote: string, question: string) {
-    console.log('postDecryptionResult', decryption)
     const body = JSON.stringify({
       decryption_proof: decryption.decryption_proof,
       shares: decryption.shares
     })
-    return axios.post(`${this.baseURL}/decrypt/${vote}/${question}/${decryption.sealer}`, body, {
+    return axios.post(`${this.corsURL}/${this.baseURL}/decrypt/${vote}/${question}/${decryption.sealer}`, body, {
       headers: { 'Content-Type': 'application/json' }
     })
   }
